@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendário de Trabalho</title>
+<link rel="stylesheet" href="css/calendario.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page">
+  <h1 id="pageTitle">Calendário de Carga de Trabalho</h1>
+  <p class="subtitle" id="pageSubtitle">A carregar…</p>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <div>
+      <div class="cal-panel" id="calPanel">
+        <div class="legend" id="legend">
+          <span id="syncStatus" style="margin-left:auto;font-size:10px;color:var(--muted);letter-spacing:.05em;"></span>
+          <button class="edit-toggle-btn" id="editToggleBtn" onclick="toggleEditor()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z"/></svg>
+            clique para editar
+          </button>
+        </div>
+        <div class="days-row" id="daysRow"></div>
+        <div id="tracks"></div>
+        <div class="divider"></div>
+        <div class="ev-title">Eventos chave (fixados na linha)</div>
+        <div class="ev-grid" id="evGrid"></div>
+      </div>
+
+      <div class="all-events-panel">
+        <div class="summary-cols" id="summaryGrid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: EDITOR -->
+    <div class="editor" id="editor">
+      <div class="editor-title">Editor</div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('intensity')">Intensidade</button>
+        <button class="tab" onclick="switchTab('events')">Eventos</button>
+        <button class="tab" onclick="switchTab('depts')">Departamentos</button>
+      </div>
+
+      <!-- INTENSITY TAB -->
+      <div class="tab-content active" id="tab-intensity">
+        <div class="info-box">Escolha o <b>departamento</b>, selecione o <b>dia</b> e ajuste o slider.</div>
+        <label class="field-label">Departamento</label>
+        <div class="dept-sel-list" id="deptSelList"></div>
+        <label class="field-label">Dia</label>
+        <div class="day-mini-grid" id="dayMiniGrid"></div>
+        <div class="slider-row">
+          <div class="slider-top"><span>Intensidade</span><span class="slider-val" id="sliderVal">3</span></div>
+          <input type="range" min="0" max="5" value="3" id="slider" oninput="onSlider(this.value)">
+          <div class="prev-bar" id="prevBar"></div>
+        </div>
+        <button class="btn btn-primary" onclick="applyDay()" style="margin-bottom:8px;">Aplicar ao dia selecionado</button>
+        <div class="divider"></div>
+        <label class="field-label">Aplicar a intervalo</label>
+        <div class="range-row">
+          <div><label class="field-label">De</label><input type="number" class="form-input" id="rFrom" min="1" max="31" value="1"></div>
+          <div><label class="field-label">Até</label><input type="number" class="form-input" id="rTo" min="1" max="31" value="5"></div>
+        </div>
+        <button class="btn btn-secondary" onclick="applyRange()">Aplicar intervalo</button>
+        <p class="hint">cinza = pouco trabalho · cor intensa = muito trabalho</p>
+      </div>
+
+      <!-- EVENTS TAB -->
+      <div class="tab-content" id="tab-events">
+        <div class="info-box">Adicione eventos por <b>dia específico</b> ou <b>intervalo</b>.</div>
+        <label class="field-label">Tipo de data</label>
+        <div class="type-row">
+          <button class="type-btn active" id="typeSingle" onclick="setEvType('single')">Dia único</button>
+          <button class="type-btn" id="typeRange" onclick="setEvType('range')">Intervalo</button>
+        </div>
+        <div id="evSingleFields">
+          <label class="field-label">Dia (1–31)</label>
+          <input type="number" class="form-input" id="evDay" min="1" max="31" placeholder="ex: 10" style="margin-bottom:10px;">
+        </div>
+        <div id="evRangeFields" style="display:none;">
+          <div class="range-row" style="margin-bottom:10px;">
+            <div><label class="field-label">De</label><input type="number" class="form-input" id="evFrom" min="1" max="31" placeholder="1"></div>
+            <div><label class="field-label">Até</label><input type="number" class="form-input" id="evTo" min="1" max="31" placeholder="5"></div>
+          </div>
+        </div>
+        <label class="field-label">Departamento</label>
+        <select class="form-select" id="evDept" style="margin-bottom:10px;"></select>
+        <label class="field-label">Descrição</label>
+        <input type="text" class="form-input" id="evLabel" placeholder="ex: Entrega SAFT" style="margin-bottom:10px;">
+        <div class="toggle-row" id="pinToggle" onclick="togglePin()">
+          <div class="toggle-pill"></div>
+          <span class="toggle-label">Fixar na linha do calendário</span>
+        </div>
+        <button class="btn btn-primary" onclick="addEvent()" style="margin-bottom:16px;">+ Adicionar evento</button>
+        <label class="field-label">Eventos actuais</label>
+        <div id="evList"></div>
+      </div>
+
+      <!-- DEPARTMENTS TAB -->
+      <div class="tab-content" id="tab-depts">
+        <div class="info-box">Gerencie os departamentos, os seus nomes e <b>escala de cores</b> (6 níveis: 0 = mínimo, 5 = máximo).</div>
+        <div id="deptCards"></div>
+        <button class="btn btn-secondary" onclick="openAddDeptModal()" style="margin-top:8px;">+ Adicionar departamento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT EVENT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>Editar Evento</h2>
+    <label class="field-label">Tipo de data</label>
+    <div class="type-row" style="margin-bottom:12px;">
+      <button class="type-btn active" id="editTypeSingle" onclick="setEditEvType('single')">Dia único</button>
+      <button class="type-btn" id="editTypeRange" onclick="setEditEvType('range')">Intervalo</button>
+    </div>
+    <div id="editSingleFields"><label class="field-label">Dia (1–31)</label><input type="number" class="form-input" id="editDay" min="1" max="31" style="margin-bottom:10px;"></div>
+    <div id="editRangeFields" style="display:none;">
+      <div class="range-row" style="margin-bottom:10px;">
+        <div><label class="field-label">De</label><input type="number" class="form-input" id="editFrom" min="1" max="31"></div>
+        <div><label class="field-label">Até</label><input type="number" class="form-input" id="editTo" min="1" max="31"></div>
+      </div>
+    </div>
+    <label class="field-label">Departamento</label>
+    <select class="form-select" id="editEvDept" style="margin-bottom:10px;"></select>
+    <label class="field-label">Descrição</label>
+    <input type="text" class="form-input" id="editLabel" style="margin-bottom:10px;">
+    <div class="toggle-row" id="editPinToggle" onclick="toggleEditPin()">
+      <div class="toggle-pill"></div>
+      <span class="toggle-label">Fixar na linha do calendário</span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditEvent()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT DEPT MODAL -->
+<div class="modal-overlay" id="deptModal">
+  <div class="modal">
+    <h2 id="deptModalTitle">Novo Departamento</h2>
+    <label class="field-label">Nome</label>
+    <input type="text" class="form-input" id="deptName" placeholder="ex: Recursos Humanos" style="margin-bottom:14px;">
+    <label class="field-label">Escala de cores (0 = mínimo · 5 = máximo)</label>
+    <div class="modal-scale-row" id="deptColorScaleEdit"></div>
+    <p style="font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:14px;">Clique em cada cor para alterar. A escala deve ir do mais claro (0) para o mais escuro/saturado (5).</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('deptModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveDept()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/calendario-service.js"></script>
+<script src="js/calendario.js"></script>
+</body>
+</html>
+

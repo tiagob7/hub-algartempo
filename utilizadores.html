@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Utilizadores</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/utilizadores.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page">
+  <div class="header-top">
+    <h1>Gestão de Utilizadores</h1>
+    <span id="syncStatus"></span>
+  </div>
+  <p class="subtitle">Apenas administradores podem aceder a esta área</p>
+
+  <div class="toolbar">
+    <span class="badge-me" id="meInfo"></span>
+    <div class="legend">
+      <span><span class="dot dot-admin"></span>Admin</span>
+      <span><span class="dot dot-colab"></span>Colaborador</span>
+    </div>
+    <button class="btn-novo" onclick="abrirModalNovo()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;"><path d="M8 2v12M2 8h12"/></svg>
+      Novo utilizador
+    </button>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-label">Filtrar:</span>
+    <select class="filter-select" id="roleFilter" onchange="setRoleFilter(this.value)">
+      <option value="">Todos os perfis</option>
+      <option value="admin">Só admins</option>
+      <option value="colaborador">Só colaboradores</option>
+    </select>
+    <select class="filter-select" id="escritorioFilter" onchange="setEscritorioFilter(this.value)">
+      <option value="">Todos os escritórios</option>
+      <option value="quarteira">Quarteira</option>
+      <option value="albufeira">Albufeira</option>
+      <option value="lisboa">Lisboa</option>
+      <option value="porto">Porto</option>
+    </select>
+    <input type="text" class="filter-select" id="searchInput" placeholder="Pesquisar nome ou email…"
+      oninput="setSearch(this.value)" style="min-width:180px;border-radius:20px;">
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Utilizador</th>
+          <th>Escritório</th>
+          <th>Perfil</th>
+          <th>Estado</th>
+          <th>Último acesso</th>
+          <th>Permissões</th>
+        </tr>
+      </thead>
+      <tbody id="usersTbody">
+        <tr><td colspan="6" class="empty">A carregar utilizadores…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL NOVO UTILIZADOR -->
+<div class="modal-overlay" id="modalNovoUser">
+  <div class="modal">
+    <h3>Novo Utilizador</h3>
+    <div class="modal-info">
+      Será criada uma conta ativa imediatamente. O escritório escolhido entra logo na lógica comum da app e fica pronto para os módulos novos que venhas a adicionar.
+    </div>
+    <div class="modal-grid">
+      <div>
+        <label class="field-label">Nome</label>
+        <input class="field-input" type="text" id="newNome" placeholder="Nome">
+      </div>
+      <div>
+        <label class="field-label">Apelido</label>
+        <input class="field-input" type="text" id="newApelido" placeholder="Apelido">
+      </div>
+    </div>
+    <label class="field-label">Email</label>
+    <input class="field-input" type="email" id="newEmail" placeholder="nome@empresa.pt">
+    <label class="field-label">Escritório</label>
+    <select class="field-select-modal" id="newEscritorio">
+      <option value="">Selecionar…</option>
+    </select>
+    <label class="field-label">Perfil</label>
+    <select class="field-select-modal" id="newRole">
+      <option value="colaborador">Colaborador</option>
+      <option value="admin">Admin</option>
+    </select>
+    <label class="field-label">Password</label>
+    <input class="field-input" type="password" id="newPassword" placeholder="Mínimo 6 caracteres">
+    <div id="modalNovoErr" style="display:none;color:var(--red);font-size:11px;margin-bottom:10px;"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModalNovo()">Cancelar</button>
+      <button class="btn-save" id="btnSalvarNovo" onclick="criarUtilizador()">Criar conta</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/users-service.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/utilizadores.js"></script>
+</body>
+</html>
+
+
+

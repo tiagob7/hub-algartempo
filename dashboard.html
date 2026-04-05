@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Painel Geral</title>
+<link rel="stylesheet" href="css/dashboard.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<!-- A navbar de auth é injetada aqui pelo auth.js -->
+<!-- Tooltips flutuantes -->
+<div id="admTooltip"></div>
+<div id="taskTooltip"></div>
+<div id="recTooltip"></div>
+
+<div class="page">
+
+  <div class="header-top">
+    <h1>Dashboard</h1>
+    <span class="last-update" id="lastUpdate"></span>
+    <span id="syncStatus"></span>
+    <!-- botão definições (só admin) -->
+    <a id="userAdminBtn" href="definicoes.html"
+       style="display:none;margin-left:8px;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-decoration:none;transition:all .15s;">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" style="width:12px;height:12px;">
+        <circle cx="8" cy="8" r="2"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.3 3.3l1.4 1.4M11.3 11.3l1.4 1.4M3.3 12.7l1.4-1.4M11.3 4.7l1.4-1.4"/>
+      </svg>
+      <span>Definições</span>
+    </a>
+    <!-- dark mode toggle -->
+    <button id="darkModeToggle" onclick="toggleDarkMode()" title="Alternar modo escuro" style="margin-left:4px;">
+      <span class="dark-toggle-icon">🌙</span>
+    </button>
+    <!-- admin: filtro de escritório (pills) -->
+    <div id="adminEscritorioPills" style="display:none;gap:4px;flex-wrap:wrap;align-items:center;"></div>
+  </div>
+
+  <!-- subtítulo: escritório (esquerda) · visão geral · utilizador+sair (direita) -->
+  <div class="subtitle" id="subtitleRow">
+    <span id="escritorioBadge"></span>
+    <span style="flex:1">Visão geral</span>
+    <button class="layout-reset-btn" id="layoutResetBtn" onclick="resetLayout()" title="Repor layout original">
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8a6 6 0 1 0 1.5-4M2 4v4h4"/></svg>
+      Repor layout
+    </button>
+    <div id="dashUserInfo" style="display:flex;align-items:center;gap:8px;"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-links">
+    <a class="nav-link" href="tarefas.html">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="10" height="10" rx="1.5"/><path d="M6 7l1.5 1.5L10 6"/></svg>
+      Tarefas
+    </a>
+    <a class="nav-link" href="comunicados.html">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H3a1 1 0 00-1 1v9a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/></svg>
+      Comunicados
+    </a>
+    <a class="nav-link" href="calendario.html">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>
+      Calendário
+    </a>
+    <a class="nav-link" href="admissoes.html">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/><path d="M11 8l2 2 3-3"/></svg>
+      Admissões
+    </a>
+    <a class="nav-link" href="reclamacoes.html">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v4"/><circle cx="8" cy="11.5" r=".6" fill="currentColor"/></svg>
+      Reclamações
+    </a>
+    <!-- PESQUISA GLOBAL -->
+    <div style="margin-left:auto;position:relative;" id="globalSearchWrap">
+      <button onclick="toggleGlobalSearch()" id="globalSearchBtn"
+        style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);background:var(--surface);border-radius:20px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3.5 3.5"/></svg>
+        Pesquisar
+      </button>
+      <div id="globalSearchPanel" style="display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:400;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);width:340px;padding:14px;">
+        <input type="text" id="globalSearchInput" placeholder="Pesquisar em tarefas, comunicados, reclamações…"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:8px 12px;border-radius:8px;outline:none;margin-bottom:10px;"
+          oninput="doGlobalSearch(this.value)" autocomplete="off">
+        <div id="globalSearchResults" style="max-height:280px;overflow-y:auto;"></div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Ir para:</span>
+          <a href="tarefas.html" style="font-size:9px;color:var(--accent);text-decoration:none;">Tarefas</a>
+          <a href="comunicados.html" style="font-size:9px;color:var(--accent);text-decoration:none;">Comunicados</a>
+          <a href="reclamacoes.html" style="font-size:9px;color:var(--accent);text-decoration:none;">Reclamações</a>
+          <a href="admissoes.html" style="font-size:9px;color:var(--accent);text-decoration:none;">Admissões</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URGENTE BANNER -->
+  <div id="urgenteBanner" style="display:none;"></div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-row" id="kpiRow">
+    <div class="kpi-card"><div class="skeleton skeleton-line" style="width:40px;height:32px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton skeleton-line w-3/4" style="height:8px;"></div></div>
+    <div class="kpi-card"><div class="skeleton skeleton-line" style="width:40px;height:32px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton skeleton-line w-1/2" style="height:8px;"></div></div>
+    <div class="kpi-card"><div class="skeleton skeleton-line" style="width:40px;height:32px;margin-bottom:6px;border-radius:6px;"></div><div class="skeleton skeleton-line w-3/4" style="height:8px;"></div></div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid" id="mainGrid">
+
+    <!-- COMUNICADOS RECENTES -->
+    <div class="panel full" data-panel-id="comunicados">
+      <div class="panel-header">
+        <span class="drag-handle" title="Arrastar">⠿</span>
+        <span class="panel-title">📢 Comunicados recentes</span>
+        <a class="panel-link" href="comunicados.html">Ver todos →</a>
+        <button class="panel-width-btn" onclick="toggleWidth(this)" title="Alternar largura">⇔</button>
+      </div>
+      <div id="comList" class="com-grid"><div class="loading-skeleton" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"><div class="skeleton skeleton-line" style="height:10px;width:75%;"></div><div class="skeleton skeleton-line" style="height:10px;width:55%;"></div><div class="skeleton skeleton-line" style="height:10px;width:85%;"></div></div></div>
+    </div>
+
+    <!-- TAREFAS ACTIVAS -->
+    <div class="panel" data-panel-id="tarefas">
+      <div class="panel-header">
+        <span class="drag-handle" title="Arrastar">⠿</span>
+        <span class="panel-title">📋 Tarefas activas</span>
+        <a class="panel-link" href="tarefas.html">Ver todas →</a>
+        <button class="panel-width-btn" onclick="toggleWidth(this)" title="Alternar largura">⇔</button>
+      </div>
+      <div id="tasksList"><div class="loading-skeleton" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"><div class="skeleton skeleton-line" style="height:10px;width:75%;"></div><div class="skeleton skeleton-line" style="height:10px;width:55%;"></div><div class="skeleton skeleton-line" style="height:10px;width:85%;"></div></div></div>
+      <div class="progress-wrap" id="progressWrap" style="display:none;">
+        <div class="progress-row">
+          <span>Progresso geral</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- ADMISSÕES RECENTES -->
+    <div class="panel" data-panel-id="admissoes">
+      <div class="panel-header">
+        <span class="drag-handle" title="Arrastar">⠿</span>
+        <span class="panel-title">👤 Processos de admissão / cessação</span>
+        <a class="panel-link" href="admissoes.html">Ver todos →</a>
+        <button class="panel-width-btn" onclick="toggleWidth(this)" title="Alternar largura">⇔</button>
+      </div>
+      <div id="admList"><div class="loading-skeleton" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"><div class="skeleton skeleton-line" style="height:10px;width:75%;"></div><div class="skeleton skeleton-line" style="height:10px;width:55%;"></div><div class="skeleton skeleton-line" style="height:10px;width:85%;"></div></div></div>
+    </div>
+
+    <!-- RECLAMAÇÕES EM ABERTO -->
+    <div class="panel full" data-panel-id="reclamacoes" id="reclamacoesPanelWrap">
+      <div class="panel-header">
+        <span class="drag-handle" title="Arrastar">⠿</span>
+        <span class="panel-title">⚠️ Reclamações em aberto</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="recKpis" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+          <a class="panel-link" href="reclamacoes.html">Ver todas →</a>
+        </div>
+        <button class="panel-width-btn" onclick="toggleWidth(this)" title="Alternar largura">⇔</button>
+      </div>
+      <div id="recList"><div class="loading-skeleton" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"><div class="skeleton skeleton-line" style="height:10px;width:75%;"></div><div class="skeleton skeleton-line" style="height:10px;width:55%;"></div><div class="skeleton skeleton-line" style="height:10px;width:85%;"></div></div></div>
+    </div>
+
+    <!-- CALENDÁRIO MINI -->
+    <div class="panel full" data-panel-id="calendario">
+      <div class="panel-header">
+        <span class="drag-handle" title="Arrastar">⠿</span>
+        <span class="panel-title">📅 Carga de trabalho do mês</span>
+        <a class="panel-link" href="calendario.html">Editar →</a>
+        <button class="panel-width-btn" onclick="toggleWidth(this)" title="Alternar largura">⇔</button>
+      </div>
+      <div id="calMini"><div class="loading-skeleton" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"><div class="skeleton skeleton-line" style="height:10px;width:75%;"></div><div class="skeleton skeleton-line" style="height:10px;width:55%;"></div><div class="skeleton skeleton-line" style="height:10px;width:85%;"></div></div></div>
+    </div>
+
+    <!-- EVENTOS DO CALENDÁRIO -->
+    <div class="panel" data-panel-id="eventos">
+      <div class="panel-header">
+        <span class="drag-handle" title="Arrastar">⠿</span>
+        <span class="panel-title">🗓 Eventos do mês</span>
+        <a class="panel-link" href="calendario.html">Ver calendário →</a>
+        <button class="panel-width-btn" onclick="toggleWidth(this)" title="Alternar largura">⇔</button>
+      </div>
+      <div id="evList"><div class="loading-skeleton" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"><div class="skeleton skeleton-line" style="height:10px;width:75%;"></div><div class="skeleton skeleton-line" style="height:10px;width:55%;"></div><div class="skeleton skeleton-line" style="height:10px;width:85%;"></div></div></div>
+    </div>
+
+    <!-- ACTIVIDADE RECENTE -->
+    <div class="panel" data-panel-id="actividade">
+      <div class="panel-header">
+        <span class="drag-handle" title="Arrastar">⠿</span>
+        <span class="panel-title">⚡ Actividade recente</span>
+        <button class="panel-width-btn" onclick="toggleWidth(this)" title="Alternar largura">⇔</button>
+      </div>
+      <div id="activityList"><div class="loading-skeleton" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"><div class="skeleton skeleton-line" style="height:10px;width:75%;"></div><div class="skeleton skeleton-line" style="height:10px;width:55%;"></div><div class="skeleton skeleton-line" style="height:10px;width:85%;"></div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- SortableJS — drag & drop painéis -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+
+<!-- Inicialização partilhada + auth module -->
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admissões & Cessações</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/admissoes.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+<div class="page">
+
+  <div class="header-top">
+    <h1>Admissões & Cessações</h1>
+    <span id="syncStatus"></span>
+  </div>
+  <p class="subtitle">Gestão de entradas e saídas de colaboradores</p>
+
+  <!-- STATS + GESTOR -->
+  <div class="stats-row" id="statsBar">
+    <div class="stat-chip s-admissao"><span class="stat-val" id="statAdm">—</span><span class="stat-lbl">Admissões</span></div>
+    <div class="stat-chip s-cessacao"><span class="stat-val" id="statCes">—</span><span class="stat-lbl">Cessações</span></div>
+    <div class="stat-chip s-alta"><span class="stat-val" id="statAlta">—</span><span class="stat-lbl">Alta prioridade</span></div>
+    <div class="stat-chip s-pendente"><span class="stat-val" id="statPend">—</span><span class="stat-lbl">Pendentes</span></div>
+    <div class="stat-chip s-concluido"><span class="stat-val" id="statConc">—</span><span class="stat-lbl">Concluídos</span></div>
+    <button class="btn-gestor" id="btnGestor" onclick="openPinModal()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="8" rx="1.5"/><path d="M5 7V5a3 3 0 016 0v2"/></svg>
+      Modo Gestor
+    </button>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-panel">
+    <div class="panel-title">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3l2 1.5"/></svg>
+      Novo Processo
+      <button class="mic-trigger-btn" onclick="VozAI.abrir('admissao')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M2 8c0 3.3 2.7 6 6 6s6-2.7 6-6"/><path d="M8 14v2"/></svg>
+        Voz
+      </button>
+    </div>
+
+    <!-- TIPO SELECTOR -->
+    <div class="tipo-selector">
+      <div class="tipo-card sel-admissao" id="cardAdmissao" onclick="selTipo('admissao')">
+        <div class="tipo-card-icon">🟢</div>
+        <div class="tipo-card-label">Admissão</div>
+        <div class="tipo-card-desc">Entrada de novo colaborador</div>
+      </div>
+      <div class="tipo-card" id="cardCessacao" onclick="selTipo('cessacao')">
+        <div class="tipo-card-icon">🟠</div>
+        <div class="tipo-card-label">Cessação</div>
+        <div class="tipo-card-desc">Saída de colaborador</div>
+      </div>
+    </div>
+
+    <!-- SUBMETIDO POR (automático) + ESCRITÓRIO DESTINO -->
+    <div class="section-label">Submetido por</div>
+    <div class="form-grid">
+      <div>
+        <label class="field-label">Utilizador</label>
+        <div class="user-info-row">
+          <span class="user-info-name" id="userName">A carregar…</span>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Escritório que trata</label>
+        <select class="form-select" id="fEscritorioAdm">
+          <option value="">A carregar…</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- DADOS DO COLABORADOR -->
+    <div class="section-label">Dados do colaborador</div>
+    <div class="form-grid">
+      <div>
+        <label class="field-label">Nº Colaborador</label>
+        <input type="text" class="form-input" id="fNumero" placeholder="ex: 00142" maxlength="20" autocomplete="off">
+      </div>
+      <div>
+        <label class="field-label">NIF</label>
+        <input type="text" class="form-input" id="fNif" placeholder="ex: 123456789" maxlength="20" autocomplete="off">
+      </div>
+      <div class="full">
+        <label class="field-label">Nome completo <span class="req">*</span></label>
+        <input type="text" class="form-input" id="fNome" placeholder="ex: João Ferreira" maxlength="100" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CAMPOS ADMISSÃO -->
+    <div id="blocoCamposAdmissao">
+      <div class="section-label">Empresa e categoria</div>
+      <div class="form-grid">
+        <div>
+          <label class="field-label">Empresa Utilizadora <span class="req">*</span></label>
+          <input type="text" class="form-input" id="fEmpresa" placeholder="ex: Empresa X, Lda" maxlength="100" autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label">Categoria Profissional</label>
+          <input type="text" class="form-input" id="fCategoria" placeholder="ex: Técnico de Contabilidade" maxlength="100" autocomplete="off">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Condições contratuais</div>
+      <div class="form-grid">
+        <div class="full">
+          <label class="field-label">Tipo de pagamento</label>
+          <div class="pagamento-row" id="pagamentoRow">
+            <button class="pag-pill sel" data-p="mes" onclick="selPagamento('mes')">📅 Mensal</button>
+            <button class="pag-pill" data-p="hora" onclick="selPagamento('hora')">⏱ À hora</button>
+          </div>
+        </div>
+        <div class="full">
+          <div class="valor-group">
+            <div>
+              <label class="field-label">Valor Base (€)</label>
+              <input type="number" class="form-input" id="fValorBase" placeholder="ex: 850.00" min="0" step="0.01">
+            </div>
+            <div>
+              <label class="field-label">Valor Hora (€)</label>
+              <input type="number" class="form-input" id="fValorHora" placeholder="ex: 5.20" min="0" step="0.01">
+            </div>
+            <div>
+              <label class="field-label">Valor Mês (€)</label>
+              <input type="number" class="form-input" id="fValorMes" placeholder="ex: 900.00" min="0" step="0.01">
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Data de Entrada <span class="req">*</span></label>
+          <input type="date" class="form-input" id="fDataEntrada" onchange="updatePrioPreview()">
+          <div class="prio-preview" id="prioPreview" style="display:none;margin-top:6px;">
+            <div class="prio-preview-dot"></div>
+            <span class="prio-preview-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAMPOS CESSAÇÃO -->
+    <div id="blocoCamposCessacao" style="display:none;">
+      <div class="section-label">Dados da saída</div>
+      <div class="form-grid">
+        <div>
+          <label class="field-label">Data de Saída <span class="req">*</span></label>
+          <input type="date" class="form-input" id="fDataSaida" onchange="updatePrioPreviewCessacao()">
+          <div class="prio-preview" id="prioPreviewCessacao" style="display:none;margin-top:6px;">
+            <div class="prio-preview-dot"></div>
+            <span class="prio-preview-text"></span>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Motivo da saída</label>
+          <select class="form-select" id="fMotivo">
+            <option value="">— Seleccionar —</option>
+            <option value="Rescisão por iniciativa do trabalhador">Rescisão por iniciativa do trabalhador</option>
+            <option value="Caducidade do contrato">Caducidade do contrato</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Anexos (opcional)</div>
+    <label class="btn-attach" onclick="void(0)">
+      📎 Adicionar ficheiros
+      <input type="file" id="fFicheirosAdm" multiple onchange="onPendingFilesAdmChange(this)">
+    </label>
+    <div id="pendingFilesAdmList" style="margin-top:6px;"></div>
+    <div class="upload-status" id="formAdmUploadStatus"></div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
+      <button class="btn btn-primary" id="btnSubmeterProcesso" onclick="submitProcesso()">+ Submeter processo</button>
+    </div>
+  </div>
+
+  <div class="controls-wrap">
+    <div class="controls-row">
+      <span class="ctrl-label">Tipo:</span>
+      <button class="filter-btn active" data-ft="todos" onclick="setFilterTipo('todos')">Todos</button>
+      <button class="filter-btn" data-ft="admissao" onclick="setFilterTipo('admissao')">Admissões</button>
+      <button class="filter-btn" data-ft="cessacao" onclick="setFilterTipo('cessacao')">Cessações</button>
+      <span class="count-badge" id="countBadge"></span>
+    </div>
+    <div class="controls-row">
+      <span class="ctrl-label">Estado:</span>
+      <button class="filter-btn active" data-fe="activos" onclick="setFilterEstado('activos')">Activos</button>
+      <button class="filter-btn" data-fe="todos" onclick="setFilterEstado('todos')">Todos</button>
+      <button class="filter-btn" data-fe="aguardar" onclick="setFilterEstado('aguardar')">A aguardar</button>
+      <button class="filter-btn" data-fe="pendente" onclick="setFilterEstado('pendente')">Pendentes</button>
+      <button class="filter-btn" data-fe="concluido" onclick="setFilterEstado('concluido')">Concluídos</button>
+    </div>
+    <div class="controls-row">
+      <span class="ctrl-label">Prio:</span>
+      <button class="filter-btn active" data-fp="todos" onclick="setFilterPrio('todos')">Todas</button>
+      <button class="filter-btn" data-fp="alta" onclick="setFilterPrio('alta')">🔴 Alta</button>
+      <button class="filter-btn" data-fp="media" onclick="setFilterPrio('media')">🟡 Média</button>
+      <button class="filter-btn" data-fp="baixa" onclick="setFilterPrio('baixa')">🟢 Baixa</button>
+    </div>
+    <div class="controls-row" id="rowFiltroEscritorio" style="display:none;">
+      <span class="ctrl-label">Escritório:</span>
+      <select id="filterEscritorioAdm" onchange="setFiltroEscritorioAdm(this.value)"
+        style="padding:5px 8px;border:1px solid var(--border);background:var(--surface2);font-family:'DM Mono',monospace;font-size:10px;border-radius:20px;color:var(--muted);outline:none;cursor:pointer;">
+        <option value="">Todos os escritórios</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div class="cards-list" id="cardsList"></div>
+
+</div>
+
+<!-- PIN MODAL -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal">
+    <h2>Modo Gestor (RH)</h2>
+    <p>Introduz o PIN para gerir os processos de admissão e cessação.</p>
+    <input type="password" inputmode="numeric" maxlength="4" class="pin-input" id="pinInput" placeholder="••••" oninput="onPinInput()">
+    <div class="pin-error" id="pinError"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closePinModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="checkPin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/admissoes-service.js"></script>
+<script src="js/voz-ai.js"></script>
+<script src="js/admissoes.js"></script>
+
+
+
+</body>
+</html>
+
+

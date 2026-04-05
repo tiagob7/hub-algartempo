@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auditoria — Histórico de Alterações</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/auditoria.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<!-- auditoria.js não é necessário aqui (só leitura) -->
+
+<div class="page">
+  <h1>Auditoria</h1>
+  <div class="subtitle">Histórico de alterações · acesso restrito a admins</div>
+
+  <!-- FILTROS -->
+  <div class="filters">
+    <span class="filter-label">Filtrar</span>
+
+    <select class="filter-select" id="filtroModulo" onchange="aplicarFiltros()">
+      <option value="">Todos os módulos</option>
+      <option value="tarefas">Tarefas</option>
+      <option value="comunicados">Comunicados</option>
+      <option value="admissoes">Admissões</option>
+      <option value="reclamacoes">Reclamações</option>
+      <option value="utilizadores">Utilizadores</option>
+      <option value="calendarios">Calendários</option>
+    </select>
+
+    <select class="filter-select" id="filtroAcao" onchange="aplicarFiltros()">
+      <option value="">Todas as ações</option>
+      <option value="criado">Criado</option>
+      <option value="atualizado">Atualizado</option>
+      <option value="eliminado">Eliminado</option>
+      <option value="estado">Estado alterado</option>
+      <option value="permissao">Permissão alterada</option>
+    </select>
+
+    <select class="filter-select" id="filtroEscritorio" onchange="aplicarFiltros()">
+      <option value="">Todos os escritórios</option>
+    </select>
+
+    <input type="text" class="filter-input" id="filtroTexto"
+           placeholder="Pesquisar por título ou utilizador…"
+           oninput="aplicarFiltros()">
+
+    <button class="btn btn-secondary btn-sm" onclick="limparFiltros()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 4L4 12M4 4l8 8"/>
+      </svg>
+      Limpar
+    </button>
+
+    <button class="btn btn-secondary btn-sm" onclick="exportarCSV()" style="margin-left:auto;">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M8 3v8M5 8l3 3 3-3M3 13h10"/>
+      </svg>
+      Exportar CSV
+    </button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow"></div>
+
+  <!-- LOADING -->
+  <div id="loadingBar" class="loading-bar"><div class="loading-bar-inner"></div></div>
+
+  <!-- TIMELINE -->
+  <div class="timeline" id="timeline"></div>
+
+  <!-- LOAD MORE -->
+  <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+    <button class="btn btn-secondary" onclick="carregarMais()">Carregar mais registos</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/auditoria-page.js"></script>
+</body>
+</html>
+
+

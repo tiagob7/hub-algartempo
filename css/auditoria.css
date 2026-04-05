@@ -1,0 +1,80 @@
+/* ── CSS específico de auditoria.html ── */
+.page{max-width:1100px;}
+
+/* FILTROS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+
+/* STATS ROW */
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:10px;display:flex;align-items:center;gap:6px;color:var(--muted);}
+.stat-pill strong{font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--text);}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px;}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border);border-radius:2px;}
+.tl-group{margin-bottom:24px;}
+.tl-date{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;margin-left:-28px;display:flex;align-items:center;gap:8px;}
+.tl-date::after{content:'';flex:1;height:1px;background:var(--border);}
+.tl-entry{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.tl-entry:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(37,99,235,.08);}
+.tl-entry.expanded{border-color:var(--accent);}
+.tl-entry::before{content:'';position:absolute;left:-24px;top:18px;width:10px;height:10px;border-radius:50%;border:2px solid var(--surface);background:var(--muted);}
+.tl-entry.acao-criado::before    {background:var(--green);}
+.tl-entry.acao-eliminado::before {background:var(--red);}
+.tl-entry.acao-estado::before    {background:var(--blue);}
+.tl-entry.acao-permissao::before {background:var(--purple);}
+.tl-entry.acao-atualizado::before{background:var(--amber);}
+.tl-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tl-modulo{font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap;}
+.mod-tarefas     {background:var(--blue-bg);   color:var(--blue);   border:1px solid var(--blue-border);}
+.mod-comunicados {background:var(--purple-bg); color:var(--purple); border:1px solid var(--purple-border);}
+.mod-admissoes   {background:var(--green-bg);  color:var(--green);  border:1px solid var(--green-border);}
+.mod-reclamacoes {background:var(--amber-bg);  color:var(--amber);  border:1px solid var(--amber-border);}
+.mod-utilizadores{background:var(--red-bg);    color:var(--red);    border:1px solid var(--red-border);}
+.mod-calendarios {background:var(--surface2);  color:var(--muted);  border:1px solid var(--border);}
+.tl-acao{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.tl-titulo{font-size:12px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tl-hora{font-size:10px;color:var(--muted);white-space:nowrap;margin-left:auto;}
+.tl-user{font-size:10px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:5px;}
+.tl-user svg{width:10px;height:10px;opacity:.6;}
+
+/* DIFF */
+.tl-diff{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:none;}
+.tl-entry.expanded .tl-diff{display:block;}
+.diff-table{width:100%;border-collapse:collapse;font-size:11px;}
+.diff-table th{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:4px 8px;text-align:left;border-bottom:1px solid var(--border);font-weight:500;}
+.diff-table td{padding:5px 8px;border-bottom:1px solid var(--surface2);vertical-align:top;}
+.diff-table tr:last-child td{border-bottom:none;}
+.diff-campo{font-weight:500;color:var(--text);}
+.diff-antes{color:var(--red);text-decoration:line-through;opacity:.8;}
+.diff-depois{color:var(--green);font-weight:500;}
+.diff-empty{color:var(--muted);font-style:italic;}
+.nota-badge{display:inline-block;margin-top:8px;padding:4px 10px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:6px;font-size:10px;color:var(--amber);}
+
+/* LOAD MORE */
+.load-more-wrap{text-align:center;padding:20px 0;}
+
+/* ── MEDIA QUERIES — auditoria.html ── */
+@media(max-width:768px){
+  .page{max-width:100%;}
+  .filters{gap:6px;}
+  .filter-select,.filter-input{font-size:10px;padding:5px 9px;}
+  .filter-input{min-width:140px;}
+  .timeline{padding-left:18px;}
+  .timeline::before{left:4px;}
+  .tl-entry::before{left:-16px;width:8px;height:8px;}
+  .tl-date{margin-left:-18px;}
+  .tl-top{gap:5px;}
+  .tl-titulo{font-size:11px;}
+  .tl-hora{display:none;}
+  .diff-table{font-size:10px;}
+  .stats-row{gap:6px;}
+  .stat-pill{padding:4px 10px;font-size:9px;}
+}
+@media(max-width:480px){
+  .page{padding:12px 10px;}
+  .filters{flex-direction:column;align-items:stretch;}
+  .filter-select,.filter-input{width:100%;}
+  .tl-modulo,.tl-acao{font-size:8px;}
+  .tl-entry{padding:10px 12px;}
+  .diff-table th,.diff-table td{padding:4px 6px;}
+}

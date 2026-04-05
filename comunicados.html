@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comunicados Internos</title>
+<link rel="stylesheet" href="css/comunicados.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+<div class="page">
+  <div class="header-top">
+    <h1>Comunicados Internos</h1>
+    <span id="syncStatus"></span>
+  </div>
+  <p class="subtitle" id="pageSubtitle">A carregar…</p>
+
+  <div class="stats-row" id="statsBar">
+    <div style="font-size:11px;color:var(--muted);">A carregar…</div>
+    <!-- botão novo comunicado (só admin) -->
+    <button class="btn-novo" id="btnNovoCom" onclick="toggleForm()">+ Novo comunicado</button>
+  </div>
+
+  <div id="urgenteBanner" style="display:none;"></div>
+
+  <!-- FORM (só admin) -->
+  <div class="form-panel" id="formPanel">
+    <div class="panel-title">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H3a1 1 0 00-1 1v9a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/></svg>
+      Novo Comunicado
+    </div>
+    <div class="form-grid">
+      <div class="full">
+        <label class="field-label">Tipo</label>
+        <div class="tipo-row" id="tipoRow">
+          <button class="tipo-pill sel" data-t="geral" onclick="selTipo('geral')">📢 Geral</button>
+          <button class="tipo-pill" data-t="urgente" onclick="selTipo('urgente')">🚨 Urgente</button>
+          <button class="tipo-pill" data-t="info" onclick="selTipo('info')">ℹ️ Info</button>
+          <button class="tipo-pill" data-t="aviso" onclick="selTipo('aviso')">⚠️ Aviso</button>
+        </div>
+      </div>
+      <div class="full">
+        <label class="field-label">Título *</label>
+        <input type="text" class="form-input" id="fTitulo" placeholder="ex: Reunião de equipa — sexta às 10h" maxlength="120" autocomplete="off">
+      </div>
+      <div class="full">
+        <label class="field-label">Mensagem *</label>
+        <textarea class="form-textarea" id="fTexto" placeholder="Escreve aqui o conteúdo do comunicado…" maxlength="1000"></textarea>
+      </div>
+      <div>
+        <label class="field-label">Autor</label>
+        <input type="text" class="form-input" id="fAutor" placeholder="ex: Direcção" maxlength="60" autocomplete="off">
+      </div>
+      <div>
+        <label class="field-label">Departamento (opcional)</label>
+        <select class="form-select" id="fDept">
+          <option value="">Todos os departamentos</option>
+          <option>Contabilidade</option>
+          <option>Payroll / RH</option>
+          <option>Comercial</option>
+          <option>Operações</option>
+          <option>Direcção</option>
+        </select>
+      </div>
+      <div class="full">
+        <label class="field-label">Escritórios destino</label>
+        <div class="esc-pill-row" id="escDestRow">
+          <!-- preenchido dinamicamente via config-escritorios.js -->
+        </div>
+        <div class="field-hint">Se não escolheres nada, considera-se apenas o teu escritório. "Todos" torna o comunicado visível em todos os escritórios.</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+      <button class="btn btn-secondary" onclick="toggleForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitComunicado()">Publicar</button>
+    </div>
+  </div>
+
+  <div class="controls-wrap">
+    <div class="controls-row">
+      <span class="ctrl-label">Filtrar:</span>
+      <button class="filter-btn active" data-f="activos" onclick="setFilter('activos')">Activos</button>
+      <button class="filter-btn" data-f="todos" onclick="setFilter('todos')">Todos</button>
+      <button class="filter-btn" data-f="urgente" onclick="setFilter('urgente')">Urgentes</button>
+      <button class="filter-btn" data-f="arquivado" onclick="setFilter('arquivado')">Arquivados</button>
+      <select id="filterEscritorioCom" onchange="setFiltroEscritorioCom(this.value)" style="padding:5px 8px;border:1px solid var(--border);background:var(--surface2);font-family:'DM Mono',monospace;font-size:10px;border-radius:20px;color:var(--muted);outline:none;cursor:pointer;max-width:150px;">
+        <option value="">Todos os escritórios</option>
+      </select>
+      <span class="count-badge" id="countBadge"></span>
+    </div>
+  </div>
+
+  <div class="comunicados-list" id="comunicadosList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/comunicados-service.js"></script>
+<script src="js/comunicados.js"></script>
+</body>
+</html>
+
+

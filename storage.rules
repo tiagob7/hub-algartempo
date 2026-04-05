@@ -1,0 +1,54 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return signedIn()
+        ? firestore.get(/databases/(default)/documents/utilizadores/$(request.auth.uid))
+        : null;
+    }
+
+    function userData() {
+      return userDoc() != null && userDoc().data != null
+        ? userDoc().data
+        : null;
+    }
+
+    function isAdmin() {
+      return signedIn() && userData() != null && userData().role == 'admin';
+    }
+
+    function isActiveUser() {
+      return signedIn() && userData() != null && userData().ativo != false;
+    }
+
+    function hasOfficeAccess(officeId) {
+      return isAdmin()
+        || officeId == null
+        || officeId == ''
+        || (userData() != null && userData().escritorio == officeId);
+    }
+
+    match /tarefas/{docId}/{fileName} {
+      allow read: if isActiveUser();
+      allow write: if isActiveUser();
+    }
+
+    match /admissoes/{docId}/{fileName} {
+      allow read: if isActiveUser();
+      allow write: if isActiveUser();
+    }
+
+    match /reclamacoes/{docId}/{fileName} {
+      allow read: if isActiveUser();
+      allow write: if isActiveUser();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

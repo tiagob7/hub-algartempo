@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Tarefas</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/tarefas.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page">
+  <div class="header-row">
+    <div class="header-top">
+      <h1>Gestão de Tarefas</h1>
+      <span id="syncStatus"></span>
+    </div>
+    <p class="subtitle" id="pageSubtitle">A carregar…</p>
+  </div>
+
+  <div class="stats-gestor-row" id="statsBar">
+    <div style="font-size:11px;color:var(--muted);">A carregar…</div>
+  </div>
+
+  <!-- FORM -->
+  <div class="novo-pedido-panel">
+    <div class="panel-title">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 1.5"/></svg>
+      Nova Tarefa
+      <button class="mic-trigger-btn" onclick="vozAbrir('tarefa')">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M2 8c0 3.3 2.7 6 6 6s6-2.7 6-6"/><path d="M8 14v2"/></svg>
+        Voz
+      </button>
+    </div>
+    <div class="form-grid">
+
+      <!-- utilizador logado (readonly) -->
+      <div>
+        <label class="field-label">Criado por</label>
+        <div class="user-info-row">
+          <span class="user-info-name" id="userName">A carregar…</span>
+        </div>
+      </div>
+
+      <!-- escritório destino editável -->
+      <div>
+        <label class="field-label">Escritório destino</label>
+        <select class="form-select" id="fEscritorio">
+          <option value="">A carregar…</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label class="field-label">Título da tarefa *</label>
+        <input type="text" class="form-input" id="fTitulo" placeholder="ex: Relatório mensal — Cliente X" maxlength="100" autocomplete="off">
+      </div>
+      <div class="full">
+        <label class="field-label">Descrição / detalhe</label>
+        <input type="text" class="form-input" id="fDescricao" placeholder="ex: Enviar até sexta com anexo PDF" maxlength="300" autocomplete="off">
+      </div>
+      <div class="full">
+        <label class="field-label">Prioridade</label>
+        <div class="prio-row">
+          <button class="prio-pill" data-p="urgente" onclick="selPrio('urgente')">🔴 Urgente</button>
+          <button class="prio-pill sel" data-p="normal" onclick="selPrio('normal')">🟡 Normal</button>
+          <button class="prio-pill" data-p="baixa" onclick="selPrio('baixa')">🟢 Baixa</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-grid" style="margin-top:10px;">
+      <div class="full">
+        <label class="field-label">Anexos (opcional)</label>
+        <label class="btn-attach" onclick="void(0)">
+          📎 Adicionar ficheiros
+          <input type="file" id="fFicheiros" multiple onchange="onPendingFilesChange(this)">
+        </label>
+        <div id="pendingFilesList" style="margin-top:6px;"></div>
+        <div class="upload-status" id="formUploadStatus"></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-primary" onclick="submitTarefa()">+ Nova Tarefa</button>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-wrap">
+    <div class="controls-row">
+      <span class="label">Ordenar:</span>
+      <button class="sort-btn active" data-sort="prio" onclick="setSort('prio')">Prioridade</button>
+      <button class="sort-btn" data-sort="fifo" onclick="setSort('fifo')">Chegada</button>
+      <button class="sort-btn" data-sort="estado" onclick="setSort('estado')">Estado</button>
+      <span class="count-badge" id="countBadge"></span>
+    </div>
+    <div class="controls-row">
+      <span class="label">Filtrar:</span>
+      <button class="filter-btn" data-f="todos" onclick="setFilter('todos')">Todos</button>
+      <button class="filter-btn active" data-f="activos" onclick="setFilter('activos')">Activos</button>
+      <button class="filter-btn" data-f="concluido" onclick="setFilter('concluido')">Concluídos</button>
+      <select class="filter-select" id="filterEscritorio" onchange="setFilterEscritorio(this.value)">
+        <option value="">Todos os escritórios</option>
+      </select>
+      <select class="filter-select" id="filterPessoa" onchange="setFilterPessoa(this.value)">
+        <option value="">Todos os criadores</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tasks-list" id="tasksList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/tasks-service.js"></script>
+<script src="js/tarefas.js"></script>
+<!-- MODAL VOZ AI -->
+<div class="voz-modal-overlay" id="vozModal">
+  <div class="voz-modal">
+    <div class="voz-modal-header">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M2 8c0 3.3 2.7 6 6 6s6-2.7 6-6"/><path d="M8 14v2"/></svg>
+      <h3 id="vozModalTitulo">Preencher com voz</h3>
+      <button class="voz-modal-close" onclick="vozFechar()">×</button>
+    </div>
+    <div class="voz-modal-body">
+      <div class="voz-mic-wrap">
+        <button class="voz-mic-btn" id="vozMicBtn" onclick="vozToggle()">
+          <svg id="vozMicIcon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M2 8c0 3.3 2.7 6 6 6s6-2.7 6-6"/><path d="M8 14v2"/></svg>
+        </button>
+        <div class="voz-waves">
+          <div class="voz-wave"></div><div class="voz-wave"></div><div class="voz-wave"></div>
+          <div class="voz-wave"></div><div class="voz-wave"></div><div class="voz-wave"></div><div class="voz-wave"></div>
+        </div>
+        <div class="voz-status" id="vozStatus">Clica para falar</div>
+      </div>
+      <div class="voz-transcript" id="vozTranscript">
+        <span id="vozTranscriptFinal"></span><span class="voz-transcript-interim" id="vozTranscriptInterim"></span>
+      </div>
+      <div class="voz-loading" id="vozLoading">
+        <div class="voz-dots"><span></span><span></span><span></span></div>
+        <p style="font-size:10px;color:var(--muted);margin-top:8px;letter-spacing:.05em;">A Claude está a interpretar…</p>
+      </div>
+      <div class="voz-fields" id="vozFields"></div>
+      <div class="voz-actions" id="vozActions">
+        <button class="voz-btn voz-btn-cancel" onclick="vozFechar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
+
+

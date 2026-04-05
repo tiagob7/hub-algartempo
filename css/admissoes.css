@@ -1,0 +1,122 @@
+/* ── CSS específico de admissoes.html ── */
+
+/* GESTOR BTN */
+.btn-gestor{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;margin-left:auto;}
+.btn-gestor:hover{border-color:var(--accent);color:var(--accent);}
+.btn-gestor.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-gestor svg{width:12px;height:12px;}
+
+/* TIPO SELECTOR */
+.tipo-selector{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.tipo-card{border:2px solid var(--border);border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .2s;background:var(--surface2);}
+.tipo-card:hover{border-color:#aaa;}
+.tipo-card.sel-admissao{border-color:var(--teal);background:var(--teal-bg);}
+.tipo-card.sel-cessacao{border-color:var(--amber);background:var(--amber-bg);}
+.tipo-card-icon{font-size:18px;margin-bottom:5px;}
+.tipo-card-label{font-family:'Manrope',sans-serif;font-size:12px;font-weight:700;}
+.tipo-card-desc{font-size:10px;color:var(--muted);margin-top:2px;}
+.tipo-card.sel-admissao .tipo-card-label{color:var(--teal);}
+.tipo-card.sel-cessacao .tipo-card-label{color:var(--amber);}
+
+/* STATS específicos */
+.stat-chip.s-admissao .stat-val{color:var(--teal);}
+.stat-chip.s-cessacao .stat-val{color:var(--amber);}
+.stat-chip.s-alta .stat-val{color:var(--red);}
+.stat-chip.s-pendente .stat-val{color:var(--blue);}
+.stat-chip.s-concluido .stat-val{color:var(--green);}
+
+/* valor group */
+.valor-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+@media(max-width:600px){.valor-group{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.valor-group{grid-template-columns:1fr;}}
+
+/* tipo pagamento pills */
+.pagamento-row{display:flex;gap:6px;}
+.pag-pill{flex:1;padding:8px 6px;border:1px solid var(--border);background:transparent;font-family:'DM Mono',monospace;font-size:10px;border-radius:6px;cursor:pointer;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;transition:all .15s;text-align:center;}
+.pag-pill[data-p="mes"].sel{background:var(--teal-bg);border-color:var(--teal);color:var(--teal);}
+.pag-pill[data-p="hora"].sel{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);}
+.pag-pill:not(.sel):hover{border-color:#aaa;color:var(--text);}
+
+/* required star */
+.req{color:var(--red);margin-left:2px;}
+.section-label{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
+/* CARD específico — admissões */
+.proc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .15s;position:relative;overflow:hidden;}
+.proc-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.09);}
+.proc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:12px 0 0 12px;}
+.proc-card.tipo-admissao::before{background:var(--teal);}
+.proc-card.tipo-cessacao::before{background:var(--amber);}
+.proc-card.estado-concluido{opacity:.72;}
+.proc-card.estado-cancelado{opacity:.6;}
+.card-header{display:grid;grid-template-columns:auto 1fr auto auto auto auto;align-items:center;gap:8px;padding:11px 16px;cursor:pointer;user-select:none;}
+@media(max-width:768px){.card-header{grid-template-columns:auto 1fr auto auto auto;}}
+@media(max-width:480px){.card-header{grid-template-columns:auto 1fr auto auto;}}
+.card-num{font-size:10px;font-weight:600;white-space:nowrap;min-width:28px;}
+.card-num.alta{color:var(--red);}.card-num.media{color:var(--amber);}.card-num.baixa{color:var(--green);}
+.card-info{min-width:0;}
+.card-nome{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.card-nome.done{text-decoration:line-through;color:var(--muted);}
+.card-empresa{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
+@media(max-width:768px){.card-date{display:none;}}
+.tipo-badge{font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:3px 8px;border-radius:10px;font-weight:500;flex-shrink:0;white-space:nowrap;}
+.tipo-badge.admissao{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border);}
+.tipo-badge.cessacao{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.prio-tag{font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:3px 8px;border-radius:10px;font-weight:500;flex-shrink:0;}
+.prio-tag.alta{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.prio-tag.media{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.prio-tag.baixa{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.estado-pill{font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:3px 9px;border-radius:10px;font-weight:500;flex-shrink:0;}
+.estado-pill.aguardar{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+.estado-pill.pendente{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);}
+.estado-pill.concluido{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.estado-pill.cancelado{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.chevron{width:14px;height:14px;color:var(--muted);flex-shrink:0;transition:transform .2s;justify-self:end;}
+.chevron.open{transform:rotate(180deg);}
+.detail-item-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;}
+.detail-item-val{font-size:11px;font-weight:500;color:var(--text);}
+.detail-item-val.val-money{font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--teal);}
+.detail-item-val.val-cessacao{color:var(--amber);}
+.card-footer-row{display:flex;align-items:center;gap:10px;font-size:10px;color:var(--muted);flex-wrap:wrap;margin-top:12px;}
+.detail-meta{display:flex;align-items:center;gap:4px;}
+.detail-meta svg{width:11px;height:11px;opacity:.5;}
+.card-notas{margin-top:10px;font-size:10px;color:var(--muted);background:var(--surface2);border:1px dashed var(--border);border-radius:6px;padding:8px 11px;line-height:1.6;}
+.card-notas-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:3px;}
+.card-gestor{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.card-gestor.show{display:block;}
+.card-gestor-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;}
+.estado-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:6px 8px;border-radius:6px;outline:none;cursor:pointer;flex-shrink:0;}
+.notas-input{flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:6px 8px;border-radius:6px;outline:none;resize:none;transition:border-color .15s;}
+.notas-input:focus{border-color:var(--accent);}
+
+/* FILE ATTACHMENTS */
+.card-files{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.files-header{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.files-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);flex:1;}
+.btn-attach{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;font-size:10px;cursor:pointer;color:var(--muted);background:none;font-family:'DM Mono',monospace;letter-spacing:.05em;transition:all .15s;}
+.btn-attach:hover{border-color:var(--accent);color:var(--accent);}
+.btn-attach input[type=file]{display:none;}
+.file-item{display:flex;align-items:center;gap:6px;font-size:10px;padding:6px 9px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);margin-bottom:4px;}
+.file-item-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-item-size{color:var(--muted);white-space:nowrap;font-size:9px;flex-shrink:0;}
+.file-item-dl{color:var(--accent);text-decoration:none;font-size:9px;white-space:nowrap;flex-shrink:0;padding:2px 6px;border-radius:4px;border:1px solid var(--blue-border);background:var(--blue-bg);}
+.file-item-dl:hover{opacity:.8;}
+.file-item-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:12px;padding:0 2px;flex-shrink:0;transition:color .1s;line-height:1;}
+.file-item-del:hover{color:var(--red);}
+.files-empty{font-size:10px;color:var(--muted);font-style:italic;padding:2px 0;}
+
+/* MODAL PIN */
+.pin-input{width:100%;text-align:center;letter-spacing:.4em;font-size:24px;font-family:'Manrope',sans-serif;font-weight:700;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;outline:none;transition:border-color .15s;margin-bottom:6px;}
+.pin-input:focus{border-color:var(--accent);}
+.pin-error{font-size:10px;color:var(--red);text-align:center;margin-bottom:12px;min-height:16px;}
+
+/* USER INFO */
+.user-info-avatar{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:'Manrope',sans-serif;}
+.user-info-name{font-size:11px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-info-role{font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:8px;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);white-space:nowrap;}
+
+/* VOZ AI */
+.mic-trigger-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:.07em;transition:all .18s;margin-left:auto;}
+.mic-trigger-btn:hover{border-color:var(--accent);color:var(--accent);}
+.mic-trigger-btn svg{width:12px;height:12px;}
+.mic-trigger-btn.recording{border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,.07);animation:micPulse 1.2s ease-in-out infinite;}

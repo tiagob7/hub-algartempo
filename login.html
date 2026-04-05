@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acesso — Calendário de Trabalho</title>
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<div class="login-wrap">
+
+  <div class="login-header">
+    <div class="login-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <path d="M16 2v4M8 2v4M3 10h18"/>
+        <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+      </svg>
+    </div>
+    <div class="login-title">Algartempo</div>
+    <div class="login-subtitle">Gestão interna</div>
+  </div>
+
+  <div class="login-card">
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
+      <button class="tab-btn" onclick="switchTab('register')" id="tabRegister">Criar conta</button>
+    </div>
+
+    <!-- ALERT -->
+    <div class="alert error" id="alertError">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 10.5v.5"/>
+      </svg>
+      <span id="alertErrorMsg"></span>
+    </div>
+    <div class="alert success" id="alertSuccess">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3-3"/>
+      </svg>
+      <span id="alertSuccessMsg"></span>
+    </div>
+    <div class="alert info" id="alertInfo">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/>
+      </svg>
+      <span id="alertInfoMsg"></span>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="form-panel active" id="panelLogin">
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input class="field-input" type="email" id="loginEmail" placeholder="nome@empresa.pt" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Password</label>
+        <div class="pass-wrap">
+          <input class="field-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
+          <button class="pass-toggle" onclick="togglePass('loginPassword', this)" type="button">
+            <svg id="eyeLogin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <a class="forgot-link" onclick="showForgot()">Esqueceste a password?</a>
+      <button class="btn-primary" id="btnLogin" onclick="doLogin()">
+        <span class="btn-text">Entrar</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="form-panel" id="panelRegister">
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label">Nome</label>
+          <input class="field-input" type="text" id="regNome" placeholder="Nome"/>
+        </div>
+        <div class="field">
+          <label class="field-label">Apelido</label>
+          <input class="field-input" type="text" id="regApelido" placeholder="Apelido"/>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input class="field-input" type="email" id="regEmail" placeholder="nome@empresa.pt" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Escritório</label>
+        <select class="field-select" id="regEscritorio">
+          <option value="">Selecionar…</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Password</label>
+        <div class="pass-wrap">
+          <input class="field-input" type="password" id="regPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+          <button class="pass-toggle" onclick="togglePass('regPassword', this)" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- role note -->
+      <div class="role-preview show" id="rolePreview">
+        <div class="role-dot" style="background:var(--blue)"></div>
+        <span>Conta criada como <strong>Colaborador</strong> — um Admin pode alterar o perfil posteriormente</span>
+      </div>
+
+      <button class="btn-primary" id="btnRegister" onclick="doRegister()" style="margin-top:16px;">
+        <span class="btn-text">Criar conta</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="login-footer">
+    © Algartempo - Uso interno
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

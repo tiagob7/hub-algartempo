@@ -1,0 +1,153 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return signedIn()
+        ? get(/databases/$(database)/documents/utilizadores/$(request.auth.uid))
+        : null;
+    }
+
+    function userData() {
+      return userDoc() != null && userDoc().data != null
+        ? userDoc().data
+        : null;
+    }
+
+    function isAdmin() {
+      return signedIn() && userData() != null && userData().role == 'admin';
+    }
+
+    function isActiveUser() {
+      return signedIn() && userData() != null && userData().ativo != false;
+    }
+
+    function canonicalPerm(path) {
+      return userData() != null
+        && userData().permissoes != null
+        && userData().permissoes.modules != null
+        && (
+          (path == 'modules.tarefas.view' && userData().permissoes.modules.tarefas.view == true) ||
+          (path == 'modules.tarefas.create' && userData().permissoes.modules.tarefas.create == true) ||
+          (path == 'modules.tarefas.resolve' && userData().permissoes.modules.tarefas.resolve == true) ||
+          (path == 'modules.comunicados.view' && userData().permissoes.modules.comunicados.view == true) ||
+          (path == 'modules.comunicados.manage' && userData().permissoes.modules.comunicados.manage == true) ||
+          (path == 'modules.calendario.view' && userData().permissoes.modules.calendario.view == true) ||
+          (path == 'modules.calendario.edit' && userData().permissoes.modules.calendario.edit == true) ||
+          (path == 'modules.admissoes.view' && userData().permissoes.modules.admissoes.view == true) ||
+          (path == 'modules.admissoes.create' && userData().permissoes.modules.admissoes.create == true) ||
+          (path == 'modules.admissoes.resolve' && userData().permissoes.modules.admissoes.resolve == true) ||
+          (path == 'modules.reclamacoes.view' && userData().permissoes.modules.reclamacoes.view == true) ||
+          (path == 'modules.reclamacoes.manage' && userData().permissoes.modules.reclamacoes.manage == true) ||
+          (path == 'modules.escalas.view' && userData().permissoes.modules.escalas.view == true) ||
+          (path == 'modules.escalas.manage' && userData().permissoes.modules.escalas.manage == true) ||
+          (path == 'modules.utilizadores.manage' && userData().permissoes.modules.utilizadores.manage == true) ||
+          (path == 'modules.definicoes.manage' && userData().permissoes.modules.definicoes.manage == true) ||
+          (path == 'modules.gerir-calendarios.manage' && userData().permissoes.modules['gerir-calendarios'].manage == true) ||
+          (path == 'modules.auditoria.view' && userData().permissoes.modules.auditoria.view == true)
+        );
+    }
+
+    function legacyPerm(path) {
+      return userData() != null
+        && userData().permissoes != null
+        && (
+          (path == 'modules.tarefas.create' && userData().permissoes.criarTarefas == true) ||
+          (path == 'modules.tarefas.resolve' && userData().permissoes.resolverTarefas == true) ||
+          (path == 'modules.comunicados.manage' && userData().permissoes.gerirComunicados == true) ||
+          (path == 'modules.calendario.edit' && userData().permissoes.editarCalendario == true) ||
+          (path == 'modules.admissoes.create' && userData().permissoes.criarAdmissoes == true) ||
+          (path == 'modules.admissoes.resolve' && userData().permissoes.resolverAdmissoes == true) ||
+          (path == 'modules.reclamacoes.manage' && userData().permissoes.criarReclamacoes == true)
+        );
+    }
+
+    function hasPerm(path) {
+      return isAdmin() || canonicalPerm(path) || legacyPerm(path);
+    }
+
+    function officeMatches(officeId) {
+      return isAdmin()
+        || officeId == null
+        || officeId == ''
+        || (userData() != null && userData().escritorio == officeId);
+    }
+
+    function destinosMatch(destinos) {
+      return isAdmin()
+        || destinos == null
+        || destinos.size() == 0
+        || destinos.hasAny(['todos', userData().escritorio]);
+    }
+
+    match /utilizadores/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || hasPerm('modules.utilizadores.manage'));
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && (
+        hasPerm('modules.utilizadores.manage')
+        || (request.auth.uid == uid
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly([
+            'ultimoAcesso',
+            'nome',
+            'apelido',
+            'nomeCompleto',
+            'funcao'
+          ]))
+      );
+      allow delete: if hasPerm('modules.utilizadores.manage');
+    }
+
+    match /config/{docId} {
+      allow read: if isActiveUser();
+      allow write: if hasPerm('modules.definicoes.manage');
+    }
+
+    match /tarefas_todo/{docId} {
+      allow read: if isActiveUser() && hasPerm('modules.tarefas.view') && officeMatches(resource.data.escritorio);
+      allow create: if isActiveUser() && hasPerm('modules.tarefas.create') && officeMatches(request.resource.data.escritorio);
+      allow update: if isActiveUser() && (
+        (hasPerm('modules.tarefas.resolve') && officeMatches(resource.data.escritorio))
+        || (hasPerm('modules.tarefas.create')
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['notas'])
+          && officeMatches(resource.data.escritorio))
+      );
+      allow delete: if isActiveUser() && hasPerm('modules.tarefas.resolve') && officeMatches(resource.data.escritorio);
+    }
+
+    match /comunicados/{docId} {
+      allow read: if isActiveUser() && hasPerm('modules.comunicados.view') && destinosMatch(resource.data.destinosEscritorio);
+      allow create: if isActiveUser() && hasPerm('modules.comunicados.manage');
+      allow update, delete: if isActiveUser() && hasPerm('modules.comunicados.manage');
+    }
+
+    match /admissoes/{docId} {
+      allow read: if isActiveUser() && hasPerm('modules.admissoes.view') && officeMatches(resource.data.escritorio);
+      allow create: if isActiveUser() && hasPerm('modules.admissoes.create') && officeMatches(request.resource.data.escritorio);
+      allow update, delete: if isActiveUser() && hasPerm('modules.admissoes.resolve') && officeMatches(resource.data.escritorio);
+    }
+
+    match /reclamacoes_horas/{docId} {
+      allow read: if isActiveUser() && hasPerm('modules.reclamacoes.view') && officeMatches(resource.data.escritorio);
+      allow create: if isActiveUser() && hasPerm('modules.reclamacoes.manage') && officeMatches(request.resource.data.escritorio);
+      allow update, delete: if isActiveUser() && hasPerm('modules.reclamacoes.manage') && officeMatches(resource.data.escritorio);
+    }
+
+    match /calendarios/{docId} {
+      allow read: if isActiveUser() && hasPerm('modules.calendario.view');
+      allow write: if isActiveUser() && hasPerm('modules.calendario.edit');
+    }
+
+    match /auditoria/{docId} {
+      allow read: if isActiveUser() && hasPerm('modules.auditoria.view');
+      allow create: if isActiveUser();
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerir Calendários</title>
+<link rel="stylesheet" href="css/gerir-calendarios.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+<div class="page">
+  <h1>Gerir Calendários</h1>
+  <p class="subtitle">Administração · Calendários de trabalho</p>
+
+  <!-- TABS -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('feriados')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/><circle cx="8" cy="11" r="1.5" fill="currentColor" stroke="none"/></svg>
+      Feriados
+    </button>
+    <button class="tab-btn" onclick="switchTab('eventos')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h7M3 12h5"/><path d="M13 10l-2 2 1 3 2-1 1-3-2-1z"/></svg>
+      Publicar Eventos
+    </button>
+    <button class="tab-btn" onclick="switchTab('apagar')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h10l-1 9H4L3 5z"/><path d="M1 5h14M6 5V3h4v2"/><path d="M7 8v4M9 8v4"/></svg>
+      Apagar Eventos
+    </button>
+    <button class="tab-btn" onclick="switchTab('ver')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4"/><path d="M11 11l3 3"/></svg>
+      Ver / Pesquisar
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 1 — FERIADOS
+  ══════════════════════════════════════════ -->
+  <div class="tab-content active" id="tab-feriados">
+    <div class="card">
+      <div class="card-title">Feriados Nacionais</div>
+
+      <div class="row-3">
+        <div>
+          <label class="field-label">De (mês)</label>
+          <select class="form-select" id="f-mesInicio"></select>
+        </div>
+        <div>
+          <label class="field-label">Até (mês)</label>
+          <select class="form-select" id="f-mesFim"></select>
+        </div>
+        <div>
+          <label class="field-label">Ano</label>
+          <input type="number" class="form-input" id="f-ano" value="2026" min="2024" max="2035">
+        </div>
+      </div>
+
+      <label class="field-label" style="margin-top:14px;">Escritórios de destino</label>
+      <div class="check-wrap" id="f-escritorios"><span style="font-size:10px;color:var(--muted)">A carregar…</span></div>
+
+      <label class="field-label" style="margin-top:14px;">Selecionar feriados</label>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button class="btn btn-secondary btn-sm" onclick="selecionarTodosFeriados(true)">Todos</button>
+        <button class="btn btn-secondary btn-sm" onclick="selecionarTodosFeriados(false)">Nenhum</button>
+      </div>
+      <div id="feriadosList" style="display:flex;flex-direction:column;gap:5px;"></div>
+
+      <div class="toggle-row" id="f-substituir" onclick="this.classList.toggle('on')" style="margin-top:16px;">
+        <div class="tp"></div>
+        <span class="tl">Substituir todos os eventos existentes antes de publicar</span>
+      </div>
+
+      <div class="progress-wrap">
+        <button class="btn btn-purple btn-full" id="f-btnPublicar" style="margin-top:14px;" onclick="publicarFeriados()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v9M4 7l4 4 4-4"/><path d="M2 14h12"/></svg>
+          Publicar Feriados
+        </button>
+        <div class="pbar"><div class="pfill" id="f-progress"></div></div>
+      </div>
+      <div class="log-wrap" id="f-logWrap"><div class="log-box" id="f-log"></div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 2 — PUBLICAR EVENTOS PERSONALIZADOS
+  ══════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-eventos">
+    <div class="card">
+      <div class="card-title">Publicar Evento em Múltiplos Calendários</div>
+
+      <!-- Destinos -->
+      <label class="field-label">Escritórios de destino</label>
+      <div class="check-wrap" id="e-escritorios"><span style="font-size:10px;color:var(--muted)">A carregar…</span></div>
+
+      <!-- Período -->
+      <div class="row-3" style="margin-top:12px;">
+        <div>
+          <label class="field-label">De (mês)</label>
+          <select class="form-select" id="e-mesInicio"></select>
+        </div>
+        <div>
+          <label class="field-label">Até (mês)</label>
+          <select class="form-select" id="e-mesFim"></select>
+        </div>
+        <div>
+          <label class="field-label">Ano</label>
+          <input type="number" class="form-input" id="e-ano" value="2026" min="2024" max="2035">
+        </div>
+      </div>
+
+      <!-- Filtro de meses específicos -->
+      <label class="field-label" style="margin-top:14px;">Apenas em meses específicos <span style="color:#bbb;text-transform:none;letter-spacing:0;">(vazio = todos no período)</span></label>
+      <div class="ck-grid" id="e-mesesEsp">
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="1">Jan</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="2">Fev</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="3">Mar</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="4">Abr</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="5">Mai</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="6">Jun</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="7">Jul</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="8">Ago</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="9">Set</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="10">Out</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="11">Nov</label>
+        <label class="ck" onclick="toggleCk(this)"><input type="checkbox" value="12">Dez</label>
+      </div>
+
+      <!-- Builder de evento -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:14px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px;">Construtor de evento</div>
+        <div class="row-2">
+          <div>
+            <label class="field-label">Dia início</label>
+            <input type="number" class="form-input" id="e-diaInicio" min="1" max="31" placeholder="ex: 5">
+          </div>
+          <div>
+            <label class="field-label">Dia fim <span style="color:#bbb;">(opcional)</span></label>
+            <input type="number" class="form-input" id="e-diaFim" min="1" max="31" placeholder="= dia único">
+          </div>
+        </div>
+        <label class="field-label">Descrição</label>
+        <input type="text" class="form-input" id="e-label" placeholder="ex: Reunião de equipa, Entrega SAFT…">
+        <div class="toggle-row" id="e-pinToggle" onclick="this.classList.toggle('on')" style="margin-top:10px;">
+          <div class="tp"></div>
+          <span class="tl">Fixar na linha do calendário (📌)</span>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:10px;width:100%;" onclick="adicionarEvento()">+ Adicionar à lista</button>
+      </div>
+
+      <!-- Lista de eventos pendentes -->
+      <label class="field-label" style="margin-top:14px;">Eventos a publicar</label>
+      <div class="ev-list" id="e-evList"><div class="empty-msg">Nenhum evento adicionado.</div></div>
+
+      <div class="toggle-row" id="e-substituir" onclick="this.classList.toggle('on')">
+        <div class="tp"></div>
+        <span class="tl">Substituir todos os eventos existentes antes de publicar</span>
+      </div>
+
+      <div class="progress-wrap">
+        <button class="btn btn-primary btn-full" id="e-btnPublicar" style="margin-top:14px;" onclick="publicarEventos()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v9M4 7l4 4 4-4"/><path d="M2 14h12"/></svg>
+          Publicar Eventos
+        </button>
+        <div class="pbar"><div class="pfill" id="e-progress"></div></div>
+      </div>
+      <div class="log-wrap" id="e-logWrap"><div class="log-box" id="e-log"></div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 3 — APAGAR EVENTOS
+  ══════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-apagar">
+    <div class="card">
+      <div class="card-title">Apagar Eventos</div>
+
+      <label class="field-label">Escritórios</label>
+      <div class="check-wrap" id="a-escritorios"><span style="font-size:10px;color:var(--muted)">A carregar…</span></div>
+
+      <div class="row-3" style="margin-top:12px;">
+        <div>
+          <label class="field-label">De (mês)</label>
+          <select class="form-select" id="a-mesInicio"></select>
+        </div>
+        <div>
+          <label class="field-label">Até (mês)</label>
+          <select class="form-select" id="a-mesFim"></select>
+        </div>
+        <div>
+          <label class="field-label">Ano</label>
+          <input type="number" class="form-input" id="a-ano" value="2026" min="2024" max="2035">
+        </div>
+      </div>
+
+      <label class="field-label" style="margin-top:14px;">Modo de eliminação</label>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--surface2);">
+          <input type="radio" name="modoApagar" value="tudo" checked style="margin-top:2px;accent-color:var(--red);">
+          <div>
+            <div style="font-size:11px;font-weight:500;">Apagar todos os eventos</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">Remove todos os eventos dos documentos selecionados. As intensidades dos departamentos mantêm-se.</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--surface2);">
+          <input type="radio" name="modoApagar" value="feriados" style="margin-top:2px;accent-color:var(--red);">
+          <div>
+            <div style="font-size:11px;font-weight:500;">Apagar apenas feriados (eventos gerais)</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">Remove apenas eventos sem departamento associado (deptId vazio). Mantém eventos de Contabilidade, Payroll, etc.</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--surface2);">
+          <input type="radio" name="modoApagar" value="texto" style="margin-top:2px;accent-color:var(--red);">
+          <div>
+            <div style="font-size:11px;font-weight:500;">Apagar por texto (pesquisa)</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">Remove eventos cujo nome contenha o texto indicado.</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- campo de texto (só visível no modo texto) -->
+      <div id="a-textoWrap" style="display:none;margin-top:10px;">
+        <label class="field-label">Texto a pesquisar (não distingue maiúsculas)</label>
+        <input type="text" class="form-input" id="a-texto" placeholder="ex: SAFT, Feriado, Reunião…">
+      </div>
+
+      <div class="info-box" style="margin-top:14px;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5L10 10"/></svg>
+        <p>Esta operação <b>não pode ser desfeita</b>. Só afeta os documentos que já existem no Firestore — meses sem documento são ignorados.</p>
+      </div>
+
+      <div class="progress-wrap">
+        <button class="btn btn-danger btn-full" id="a-btnApagar" style="margin-top:14px;" onclick="apagarEventos()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h10l-1 9H4L3 5z"/><path d="M1 5h14M6 5V3h4v2"/></svg>
+          Apagar Eventos
+        </button>
+        <div class="pbar"><div class="pfill" id="a-progress"></div></div>
+      </div>
+      <div class="log-wrap" id="a-logWrap"><div class="log-box" id="a-log"></div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 4 — VER / PESQUISAR
+  ══════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-ver">
+    <div class="card">
+      <div class="card-title">Ver e Pesquisar Eventos</div>
+
+      <div class="row-3">
+        <div>
+          <label class="field-label">Escritório</label>
+          <select class="form-select" id="v-escritorio"><option value="">A carregar…</option></select>
+        </div>
+        <div>
+          <label class="field-label">De (mês)</label>
+          <select class="form-select" id="v-mesInicio"></select>
+        </div>
+        <div>
+          <label class="field-label">Até (mês)</label>
+          <select class="form-select" id="v-mesFim"></select>
+        </div>
+      </div>
+      <div class="row-2" style="margin-top:8px;">
+        <div>
+          <label class="field-label">Ano</label>
+          <input type="number" class="form-input" id="v-ano" value="2026" min="2024" max="2035">
+        </div>
+        <div>
+          <label class="field-label">Filtrar por texto <span style="color:#bbb;">(opcional)</span></label>
+          <input type="text" class="form-input" id="v-filtro" placeholder="ex: SAFT…" oninput="renderVerResultados()">
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" style="margin-top:12px;width:100%;" onclick="carregarVer()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px;"><circle cx="7" cy="7" r="4"/><path d="M11 11l3 3"/></svg>
+        Pesquisar
+      </button>
+
+      <div id="v-resultados" style="margin-top:16px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/gerir-calendarios.js"></script>
+</body>
+</html>
+
+

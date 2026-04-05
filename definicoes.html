@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Definições</title>
+<link rel="stylesheet" href="css/definicoes.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+<div class="page">
+  <h1>Definições</h1>
+  <p class="subtitle">Administração do sistema</p>
+
+  <div class="def-grid">
+
+    <!-- Utilizadores -->
+    <div class="def-card" id="cardUtilizadores" onclick="togglePainel('Utilizadores')">
+      <div class="def-card-icon blue">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="5.5" cy="5" r="2.5"/>
+          <path d="M1 13c0-2.5 1.8-4 4.5-4s4.5 1.5 4.5 4"/>
+          <circle cx="12" cy="4.5" r="1.8"/>
+          <path d="M10.5 8c1.5.3 3 1.3 3 3.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="def-card-title">Utilizadores</div>
+        <div class="def-card-desc">Gerir contas, roles e permissões dos colaboradores.</div>
+      </div>
+      <span class="def-card-link">
+        Ver utilizadores
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
+      </span>
+    </div>
+
+    <!-- Escritórios -->
+    <div class="def-card" id="cardEscritorios" onclick="togglePainel('Escritorios')">
+      <div class="def-card-icon green">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="1" y="7" width="6" height="8" rx="1"/>
+          <rect x="9" y="4" width="6" height="11" rx="1"/>
+          <path d="M4 7V4a3 3 0 016 0v7"/>
+        </svg>
+      </div>
+      <div>
+        <div class="def-card-title">Escritórios</div>
+        <div class="def-card-desc">Criar, renomear e remover escritórios da organização.</div>
+      </div>
+      <span class="def-card-link">
+        Gerir escritórios
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
+      </span>
+    </div>
+
+    <!-- Calendário -->
+    <a class="def-card" href="gerir-calendarios.html">
+      <div class="def-card-icon purple">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+          <path d="M5 1v3M11 1v3M2 7h12"/>
+          <path d="M5 10h2M9 10h2M5 13h2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="def-card-title">Calendário</div>
+        <div class="def-card-desc">Publicar feriados, eventos, apagar erros e consultar calendários.</div>
+      </div>
+      <span class="def-card-link">
+        Gerir calendários
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
+      </span>
+    </a>
+
+    <!-- Auditoria -->
+    <a class="def-card" href="auditoria.html">
+      <div class="def-card-icon amber">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M8 2a6 6 0 100 12A6 6 0 008 2z"/>
+          <path d="M8 5v3.5l2.5 1.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="def-card-title">Auditoria</div>
+        <div class="def-card-desc">Histórico detalhado de todas as alterações — quem mudou o quê e quando.</div>
+      </div>
+      <span class="def-card-link">
+        Ver histórico
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
+      </span>
+    </a>
+
+  </div>
+
+  <!-- PAINEL UTILIZADORES -->
+  <div class="panel" id="panelUtilizadores">
+    <div class="panel-header">
+      <div class="def-card-icon blue" style="width:30px;height:30px;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" style="width:15px;height:15px;">
+          <circle cx="5.5" cy="5" r="2.5"/><path d="M1 13c0-2.5 1.8-4 4.5-4s4.5 1.5 4.5 4"/>
+          <circle cx="12" cy="4.5" r="1.8"/><path d="M10.5 8c1.5.3 3 1.3 3 3.5"/>
+        </svg>
+      </div>
+      <h2>Utilizadores</h2>
+      <a href="utilizadores.html" class="btn btn-primary">Gerir completo →</a>
+    </div>
+    <div class="panel-body" id="utilizadoresBody">
+      <p style="font-size:11px;color:var(--muted);text-align:center;padding:16px 0;">A carregar…</p>
+    </div>
+  </div>
+
+  <!-- PAINEL ESCRITÓRIOS -->
+  <div class="panel" id="panelEscritorios">
+    <div class="panel-header">
+      <div class="def-card-icon green" style="width:30px;height:30px;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" style="width:15px;height:15px;">
+          <rect x="1" y="7" width="6" height="8" rx="1"/><rect x="9" y="4" width="6" height="11" rx="1"/>
+          <path d="M4 7V4a3 3 0 016 0v7"/>
+        </svg>
+      </div>
+      <h2>Escritórios</h2>
+      <button class="btn btn-green" onclick="abrirModalNovo()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;"><path d="M8 2v12M2 8h12"/></svg>
+        Novo
+      </button>
+    </div>
+    <div class="panel-body">
+      <div id="escritoriosList">
+        <p style="font-size:11px;color:var(--muted);text-align:center;padding:16px 0;">A carregar…</p>
+      </div>
+      <div class="info-note">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5"/><circle cx="8" cy="11" r=".5" fill="currentColor"/></svg>
+        <span>Lista guardada em <b>Firestore → config/escritorios</b>. Os restantes módulos (dashboard, tarefas, comunicados, admissões, calendários, etc.) passam a ler <b>dinamicamente</b> esta lista — sempre que adicionares ou removeres escritórios aqui, eles ficam imediatamente disponíveis em toda a app.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL CRIAR / EDITAR -->
+<div class="modal-overlay" id="modalEscritorio">
+  <div class="modal">
+    <h3 id="modalTitulo">Novo Escritório</h3>
+    <label class="field-label">Nome do escritório</label>
+    <input type="text" class="form-input" id="escNome" placeholder="ex: Faro, Setúbal, Braga…">
+    <label class="field-label">ID interno <span style="color:#bbb;text-transform:none;letter-spacing:0;font-size:9px;">(minúsculas, sem espaços — não pode ser alterado depois)</span></label>
+    <input type="text" class="form-input" id="escId" placeholder="ex: faro, setubal, braga…">
+    <label class="field-label">Cor</label>
+    <div class="color-swatches" id="colorSwatches"></div>
+    <label class="field-label">Ordem na lista</label>
+    <input type="number" class="form-input" id="escOrdem" min="1" step="1" placeholder="10">
+    <label class="field-label" style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;">
+      <input type="checkbox" id="escAtivo" checked>
+      Escritório ativo para os módulos e filtros da app
+    </label>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardar" onclick="guardarEscritorio()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR APAGAR -->
+<div class="modal-overlay" id="modalConfirmar">
+  <div class="modal">
+    <h3>Confirmar eliminação</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.8;" id="confirmarTexto"></p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-danger" id="btnConfirmar" onclick="confirmarApagar()">Apagar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/users-service.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/definicoes.js"></script>
+</body>
+</html>
+
+
