@@ -7,24 +7,32 @@ function esc(s){return(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
 /* ══════════════════════════════════════════════════════
    FIRESTORE
-   Coleção: escalas/{YYYY-MM-DD}
+   Coleção: escalas/{escritorioId}/dias/{YYYY-MM-DD}
    Documento: { columns: [...], empresas: {...}, updatedAt: ts, updatedBy: uid }
    ══════════════════════════════════════════════════════ */
 const db = firebase.firestore();
-const COLLECTION = 'escalas';
+
+let currentEscritorio = '';
+
+function getEscalasRef() {
+  return db.collection('escalas').doc(currentEscritorio || 'default').collection('dias');
+}
 
 // Cache local — evita re-renders desnecessários e serve de fallback offline
+// Chave inclui escritório: "{escritorioId}_{YYYY-MM-DD}"
 const DIAS_DATA = {};
+function cacheKey(key) { return (currentEscritorio || 'default') + '_' + key; }
 
 // Indicador de gravação em curso para debounce
 let _saveTimer = null;
 let _saving = false;
 
 async function loadDay(key) {
-  if (DIAS_DATA[key]) return DIAS_DATA[key];           // já em cache
+  const ck = cacheKey(key);
+  if (DIAS_DATA[ck]) return DIAS_DATA[ck];           // já em cache
   setStatus('A carregar…', 'var(--muted)');
   try {
-    const snap = await db.collection(COLLECTION).doc(key).get();
+    const snap = await getEscalasRef().doc(key).get();
     if (snap.exists) {
       const data = snap.data();
       // Reconstituir columns a partir de columnsObj (compatibilidade)
@@ -35,21 +43,21 @@ async function loadDay(key) {
         delete data.columnsObj;
         delete data.numColumns;
       }
-      DIAS_DATA[key] = data;
+      DIAS_DATA[ck] = data;
     } else {
-      DIAS_DATA[key] = { columns: [], empresas: {} };
+      DIAS_DATA[ck] = { columns: [], empresas: {} };
     }
   } catch(e) {
     console.warn('[escalas] loadDay error', e);
-    DIAS_DATA[key] = { columns: [], empresas: {} };
+    DIAS_DATA[ck] = { columns: [], empresas: {} };
   }
   setStatus('', '');
-  return DIAS_DATA[key];
+  return DIAS_DATA[ck];
 }
 
 // Guardar imediatamente (chamado pelo botão Guardar)
 async function saveDay(key) {
-  const day = DIAS_DATA[key];
+  const day = DIAS_DATA[cacheKey(key)];
   if (!day) return;
   const btnSave = document.getElementById('btnSave');
   btnSave.classList.add('saving');
@@ -60,7 +68,7 @@ async function saveDay(key) {
   (day.columns || []).forEach((col, i) => { columnsObj[String(i)] = col; });
 
   try {
-    await db.collection(COLLECTION).doc(key).set({
+    await getEscalasRef().doc(key).set({
       empresas: day.empresas || {},
       columnsObj,
       numColumns: (day.columns || []).length,
@@ -126,7 +134,7 @@ function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2
 function formatDate(d){return DIAS[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()]+' '+d.getFullYear();}
 
 function getDayData(){
-  const k=dateKey(currentDate);
+  const k=cacheKey(dateKey(currentDate));
   if(!DIAS_DATA[k]) DIAS_DATA[k]={columns:[],empresas:{}};
   return DIAS_DATA[k];
 }
@@ -763,7 +771,7 @@ function openCloneModal(mode, cardId){
 function checkCloneWarn(val){
   const warn=document.getElementById('cloneWarn');
   if(!val){warn.classList.remove('show');return;}
-  const k=inputValToKey(val);
+  const k=cacheKey(inputValToKey(val));
   const exists=DIAS_DATA[k]&&Object.keys(DIAS_DATA[k].empresas||{}).length>0;
   warn.classList.toggle('show',exists);
 }
@@ -794,7 +802,7 @@ async function execClone(){
       newEmpresas[newId]=clone;
     });
     const newColumns=srcDay.columns.map(col=>col.map(oldId=>idMap[oldId]||oldId).filter(x=>newEmpresas[x]));
-    DIAS_DATA[targetKey]={columns:newColumns,empresas:newEmpresas};
+    DIAS_DATA[cacheKey(targetKey)]={columns:newColumns,empresas:newEmpresas};
     closeCloneModal();
     currentDate=new Date(targetKey.replace(/-/g,'/'));
     await render();
@@ -806,8 +814,8 @@ async function execClone(){
     if(!emp){closeCloneModal();return;}
     // Garantir que o dia destino está carregado
     await loadDay(targetKey);
-    if(!DIAS_DATA[targetKey]) DIAS_DATA[targetKey]={empresas:{},columns:[]};
-    const targetDay=DIAS_DATA[targetKey];
+    if(!DIAS_DATA[cacheKey(targetKey)]) DIAS_DATA[cacheKey(targetKey)]={empresas:{},columns:[]};
+    const targetDay=DIAS_DATA[cacheKey(targetKey)];
     const clone=deepClone(emp);
     clone.id=uid();
     clone.secoes.forEach(s=>{
@@ -864,11 +872,34 @@ document.getElementById('btnCloneDay').onclick=()=>openCloneModal('day');
 document.getElementById('btnSave').onclick=()=>saveDay(dateKey(currentDate));
 
 /* ══════════════════════════════════════════════════════
-   INICIALIZAÇÃO — aguarda authReady
+   INICIALIZAÇÃO — bootProtectedPage (padrão comum)
    ══════════════════════════════════════════════════════ */
-document.addEventListener('authReady', () => {
-  // Injectar navbar de navegação (igual às outras páginas protegidas)
-  window.renderNavbar('escalas');
-  // Arrancar com o dia de hoje
-  render();
+window.bootProtectedPage({
+  activePage: 'escalas',
+  moduleId: 'escalas',
+}, ({ profile, isAdmin, escritorio }) => {
+  currentEscritorio = escritorio || 'quarteira';
+
+  loadEscritorios().then(lista => {
+    const sub = document.getElementById('pageSubtitle');
+
+    if (isAdmin && lista.length > 1) {
+      const pillsWrap = document.getElementById('escritorioPills');
+      pillsWrap.style.display = 'flex';
+      pillsWrap.innerHTML = lista.map(e =>
+        `<button class="esc-pill${e.id === currentEscritorio ? ' sel' : ''}" data-esc="${e.id}">${e.nome}</button>`
+      ).join('');
+      pillsWrap.querySelectorAll('.esc-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentEscritorio = btn.dataset.esc;
+          pillsWrap.querySelectorAll('.esc-pill').forEach(b => b.classList.toggle('sel', b === btn));
+          sub.textContent = nomeEscritorio(currentEscritorio) + ' · Trabalhadores temporários';
+          render();
+        });
+      });
+    }
+
+    sub.textContent = nomeEscritorio(currentEscritorio) + ' · Trabalhadores temporários';
+    render();
+  });
 });
