@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clientes</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/clientes.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page clientes-page">
+  <div class="header-row">
+    <div class="header-top">
+      <h1>Clientes</h1>
+      <span id="syncStatus"></span>
+    </div>
+    <p class="subtitle" id="pageSubtitle">Consulta global de clientes, preços e histórico de importações.</p>
+  </div>
+
+  <div class="stats-row" id="statsBar">
+    <div class="stat-chip">
+      <span class="stat-val skeleton" style="width:56px;height:22px;"></span>
+      <span class="stat-lbl">A carregar</span>
+    </div>
+  </div>
+
+  <section class="form-panel clientes-import-panel" id="importPanel">
+    <div class="panel-title panel-toggle" onclick="window.ClientesPage.toggleImportPanel()">
+      <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 2v8"/><path d="M5 7.5L8 10.5l3-3"/><path d="M3 13.5h10"/>
+      </svg>
+      Importar Excel
+      <span class="clientes-import-hint" id="importPermissionHint">A validar permissões…</span>
+      <span class="panel-toggle-chevron">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </span>
+    </div>
+
+    <div class="form-panel-body">
+      <div class="clientes-import-drop" id="importDropzone">
+        <div class="clientes-import-copy">
+          <div class="clientes-import-title">Ficheiro de preços por cliente</div>
+          <p>Formato esperado: folha principal com cabeçalho na linha 2 e colunas de cliente, categoria e preços.</p>
+        </div>
+        <label class="btn btn-primary" for="clientesImportFile">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8"/><path d="M5 7.5L8 10.5l3-3"/><path d="M3 13.5h10"/></svg>
+          Selecionar ficheiro
+        </label>
+        <input type="file" id="clientesImportFile" accept=".xlsx,.xls,.xlsm,.csv">
+      </div>
+
+      <div class="clientes-import-status" id="importBusyState" hidden>
+        <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+        <p>A analisar o ficheiro e a preparar o preview…</p>
+      </div>
+
+      <div id="importPreviewWrap"></div>
+    </div>
+  </section>
+
+  <section class="clientes-workspace">
+    <div class="clientes-column clientes-column-list">
+      <div class="clientes-panel">
+        <div class="clientes-panel-head">
+          <div>
+            <h2>Base de clientes</h2>
+            <p id="clientsCountLabel">A carregar registos…</p>
+          </div>
+        </div>
+
+        <div class="clientes-filters">
+          <label class="clientes-search">
+            <span class="field-label">Pesquisa</span>
+            <input class="filter-input" id="filterSearch" type="search" placeholder="Nome, nº cliente, grupo ou escritório">
+          </label>
+
+          <label>
+            <span class="field-label">Escritório</span>
+            <select class="filter-select" id="filterOffice">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label>
+            <span class="field-label">Estado</span>
+            <select class="filter-select" id="filterStatus">
+              <option value="todos">Todos</option>
+              <option value="com-precos">Com preços</option>
+              <option value="sem-precos">Sem preços</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clientes-list" id="clientesList"></div>
+      </div>
+    </div>
+
+    <div class="clientes-column clientes-column-detail">
+      <div class="clientes-panel clientes-detail-panel" id="clienteDetail"></div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/clientes-service.js"></script>
+<script src="js/clientes.js"></script>
+
+</body>
+</html>

@@ -126,6 +126,13 @@ service cloud.firestore {
       allow write: if isActiveUser() && hasPerm('calendario', 'edit');
     }
 
+    match /clientes/{docId} {
+      allow read: if isActiveUser() && hasPerm('clientes', 'view');
+      allow create: if isActiveUser() && hasPerm('clientes', 'import');
+      allow update: if isActiveUser() && (hasPerm('clientes', 'import') || hasPerm('clientes', 'edit'));
+      allow delete: if false;
+    }
+
     // Escalas separadas por escritório: escalas/{escritorioId}/dias/{dateKey}
     match /escalas/{escritorioId}/dias/{dateKey} {
       allow read: if isActiveUser() && hasPerm('escalas', 'view') && officeMatches(escritorioId);

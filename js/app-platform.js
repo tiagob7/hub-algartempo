@@ -7,6 +7,7 @@
     admissoes: 'Admiss&otilde;es',
     reclamacoes: 'Reclama&ccedil;&otilde;es de Horas',
     escalas: 'Escalas',
+    clientes: 'Clientes',
     definicoes: 'Defini&ccedil;&otilde;es',
     utilizadores: 'Utilizadores',
     'gerir-calendarios': 'Gerir Calend&aacute;rios',

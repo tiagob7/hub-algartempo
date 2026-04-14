@@ -37,6 +37,10 @@
     empresa:       'Empresa',
     categoria:     'Categoria',
     nif:           'NIF',
+    numeroCliente: 'Numero Cliente',
+    grupo:         'Grupo',
+    ultimaPropostaRef: 'Ref. Ultima Proposta',
+    ultimaPropostaData: 'Data Ultima Proposta',
   };
 
   // Módulos reconhecidos
@@ -45,6 +49,7 @@
     comunicados:   'Comunicados',
     admissoes:     'Admissões',
     reclamacoes:   'Reclamações',
+    clientes:      'Clientes',
     utilizadores:  'Utilizadores',
     calendarios:   'Calendários',
   };
