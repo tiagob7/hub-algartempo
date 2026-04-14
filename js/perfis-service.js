@@ -94,6 +94,8 @@
 
   const CONFIG_DOC = 'config/perfis';
 
+  function db() { return firebase.firestore(); }
+
   let _cache = null;   // array de perfis em memória
   let _loading = null; // promise em curso (evita fetch duplo)
 
@@ -142,14 +144,14 @@
     if (_cache) return _cache.slice();
     if (_loading) return _loading;
 
-    _loading = window.db.doc(CONFIG_DOC).get().then(snap => {
+    _loading = db().doc(CONFIG_DOC).get().then(snap => {
       const data = snap.exists ? snap.data() : null;
       if (data && Array.isArray(data.lista) && data.lista.length > 0) {
         _cache = data.lista;
       } else {
         _cache = DEFAULT_PROFILES.map(p => ({ ...p }));
         // Guardar defaults no Firestore silenciosamente
-        window.db.doc(CONFIG_DOC).set({ lista: _cache }).catch(err =>
+        db().doc(CONFIG_DOC).set({ lista: _cache }).catch(err =>
           console.warn('[perfis] Falha ao guardar defaults:', err)
         );
       }
@@ -166,7 +168,7 @@
 
   async function savePerfis(lista) {
     _cache = lista.slice();
-    await window.db.doc(CONFIG_DOC).set({ lista: _cache });
+    await db().doc(CONFIG_DOC).set({ lista: _cache });
   }
 
   // ── CRUD de perfis ────────────────────────────────────────────────────────────
@@ -222,7 +224,7 @@
 
     const permissoes = buildUserPermissions(perfil.permissoes);
 
-    await window.db.collection('utilizadores').doc(uid).update({
+    await db().collection('utilizadores').doc(uid).update({
       perfil: perfilId,
       permissoes,
     });
@@ -235,7 +237,7 @@
       ? window.createDefaultPermissions()
       : { modules: {} };
 
-    await window.db.collection('utilizadores').doc(uid).update({
+    await db().collection('utilizadores').doc(uid).update({
       perfil: null,
       permissoes,
     });
@@ -248,14 +250,14 @@
     const perfil = lista.find(p => p.id === perfilId);
     if (!perfil) return;
 
-    const snap = await window.db.collection('utilizadores')
+    const snap = await db().collection('utilizadores')
       .where('perfil', '==', perfilId)
       .get();
 
     if (snap.empty) return;
 
     const permissoes = buildUserPermissions(perfil.permissoes);
-    const batch = window.db.batch();
+    const batch = db().batch();
 
     snap.docs.forEach(doc => {
       batch.update(doc.ref, { permissoes });
@@ -265,7 +267,7 @@
   }
 
   async function degradarUtilizadoresComPerfil(perfilId) {
-    const snap = await window.db.collection('utilizadores')
+    const snap = await db().collection('utilizadores')
       .where('perfil', '==', perfilId)
       .get();
 
@@ -275,7 +277,7 @@
       ? window.createDefaultPermissions()
       : { modules: {} };
 
-    const batch = window.db.batch();
+    const batch = db().batch();
     snap.docs.forEach(doc => {
       batch.update(doc.ref, { perfil: null, permissoes });
     });
