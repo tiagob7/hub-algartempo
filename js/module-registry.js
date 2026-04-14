@@ -125,6 +125,16 @@
         requiredPermissions: ['modules.auditoria.view'],
         icon: '<path d="M3 4h10M3 8h8M3 12h6"/><circle cx="13" cy="12" r="2.5"/><path d="M15 14l1.5 1.5"/>',
       },
+      {
+        id: 'perfis',
+        label: 'Perfis',
+        href: 'perfis.html',
+        group: 'admin',
+        order: 115,
+        adminOnly: true,
+        requiredPermissions: ['modules.perfis.manage'],
+        icon: '<circle cx="5" cy="6" r="2.5"/><circle cx="11" cy="6" r="2.5"/><path d="M1 14c0-2.5 1.8-4 4-4s4 1.5 4 4"/><path d="M9 13c.5-1.5 1.8-3 4-3s4 1.5 4 4"/>',
+      },
     ].forEach(upsert);
   }
 

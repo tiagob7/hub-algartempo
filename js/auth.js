@@ -29,6 +29,7 @@ const PERMISSION_DEFINITIONS = [
   { key: 'modules.definicoes.manage', label: 'Gerir Definicoes' },
   { key: 'modules.gerir-calendarios.manage', label: 'Gerir Calendarios' },
   { key: 'modules.auditoria.view', label: 'Ver Auditoria' },
+  { key: 'modules.perfis.manage', label: 'Gerir Perfis' },
 ];
 
 const LEGACY_PERMISSION_MAP = PERMISSION_DEFINITIONS.reduce((acc, def) => {
@@ -72,6 +73,7 @@ function createDefaultPermissions() {
       definicoes: { manage: false },
       'gerir-calendarios': { manage: false },
       auditoria: { view: false },
+      perfis: { manage: false },
     },
   };
 

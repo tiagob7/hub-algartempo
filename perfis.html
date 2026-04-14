@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfis de Permissão</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/perfis.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page">
+  <div class="header-top">
+    <h1>Perfis de Permissão</h1>
+  </div>
+  <p class="subtitle">Define perfis reutilizáveis e atribui-os a utilizadores</p>
+
+  <div class="toolbar">
+    <span class="badge-me" id="meInfo"></span>
+  </div>
+
+  <div class="perfis-grid" id="perfisGrid">
+    <div class="perfil-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:110px;">
+      <span style="font-size:11px;color:var(--muted);">A carregar…</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ── Modal edição/criação de perfil ── -->
+<div class="modal-overlay" id="modalPerfil">
+  <div class="modal">
+    <h3 id="modalTitle">Novo Perfil</h3>
+    <div class="modal-scrollable">
+      <label class="field-label">Nome do perfil</label>
+      <input class="field-input" type="text" id="perfilNome" placeholder="Ex: Rececionista">
+
+      <div class="matrix-label">Permissões por módulo</div>
+      <div class="matrix" id="permMatrix"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btnCancelarModal">Cancelar</button>
+      <button class="btn-save" id="btnGuardarPerfil">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm delete ── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Apagar perfil?</div>
+    <div class="confirm-text" id="confirmText"></div>
+    <div class="confirm-footer">
+      <button class="btn-confirm-cancel" id="btnConfirmCancel">Cancelar</button>
+      <button class="btn-confirm-ok" id="btnConfirmOk">Apagar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/perfis-service.js"></script>
+<script src="js/perfis.js"></script>
+</body>
+</html>

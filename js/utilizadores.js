@@ -113,6 +113,23 @@ function togglePerms(uid) {
   }
 }
 
+async function applyPerfilUtilizador(uid, perfilId) {
+  try {
+    if (perfilId) {
+      await window.PerfisService.applyPerfilToUser(uid, perfilId);
+      toast('Perfil "' + perfilId + '" aplicado.');
+    } else {
+      await window.PerfisService.removePerfilFromUser(uid);
+      toast('Perfil removido. Permissoes repitas para defaults.');
+    }
+    _utilCache.ts = 0;
+    carregarUtilizadores();
+  } catch (e) {
+    console.error(e);
+    toast('Erro ao aplicar perfil.');
+  }
+}
+
 async function setPermissao(uid, perm, val) {
   const item = document.getElementById('permItem_' + uid + '_' + perm);
   if (item) item.classList.toggle('on', val);
@@ -241,7 +258,15 @@ function renderUsers() {
     if (role === 'admin') {
       innerHtml = '<span class="perm-all-badge">Admin - todas as permissoes ativas</span>';
     } else {
-      innerHtml = PERMS_DEF.map(p => {
+      const perfilAtual = u.perfil || '';
+      innerHtml = `
+        <div class="perms-perfil-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Perfil:</span>
+          <select class="select-small" id="perfilSel_${u.uid}" onchange="applyPerfilUtilizador('${u.uid}', this.value)">
+            <option value="">-- Permissoes individuais --</option>
+          </select>
+        </div>
+      ` + PERMS_DEF.map(p => {
         const checked = window.temPermissaoNoPerfil ? window.temPermissaoNoPerfil(permsProfile, p.key) : false;
         return `<div class="perm-item ${checked ? 'on' : ''}" id="permItem_${u.uid}_${p.key}">
           <input type="checkbox" id="perm_${u.uid}_${p.key}" ${checked ? 'checked' : ''} onchange="setPermissao('${u.uid}','${p.key}',this.checked)">
@@ -251,10 +276,26 @@ function renderUsers() {
     }
 
     trPerms.innerHTML = `<td colspan="6" class="perms-cell">
-      <div class="perms-label">Permissoes especificas</div>
+      <div class="perms-label">Permissoes</div>
       <div class="perms-grid">${innerHtml}</div>
     </td>`;
     tbody.appendChild(trPerms);
+
+    // Preencher select de perfis após inserir no DOM
+    if (role !== 'admin') {
+      const perfilSel = document.getElementById('perfilSel_' + u.uid);
+      if (perfilSel && window.PerfisService) {
+        window.PerfisService.loadPerfis().then(perfis => {
+          perfis.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.nome;
+            if (p.id === u.perfil) opt.selected = true;
+            perfilSel.appendChild(opt);
+          });
+        });
+      }
+    }
   });
 
   renderOfficeOptions();

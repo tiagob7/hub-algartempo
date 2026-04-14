@@ -25,48 +25,32 @@ service cloud.firestore {
       return signedIn() && userData() != null && userData().ativo != false;
     }
 
-    function canonicalPerm(path) {
+    // Verifica permissão canónica via map.get — funciona com qualquer módulo/ação
+    // sem precisar de switch hardcoded.
+    function canonicalPerm(module, action) {
       return userData() != null
         && userData().permissoes != null
         && userData().permissoes.modules != null
-        && (
-          (path == 'modules.tarefas.view' && userData().permissoes.modules.tarefas.view == true) ||
-          (path == 'modules.tarefas.create' && userData().permissoes.modules.tarefas.create == true) ||
-          (path == 'modules.tarefas.resolve' && userData().permissoes.modules.tarefas.resolve == true) ||
-          (path == 'modules.comunicados.view' && userData().permissoes.modules.comunicados.view == true) ||
-          (path == 'modules.comunicados.manage' && userData().permissoes.modules.comunicados.manage == true) ||
-          (path == 'modules.calendario.view' && userData().permissoes.modules.calendario.view == true) ||
-          (path == 'modules.calendario.edit' && userData().permissoes.modules.calendario.edit == true) ||
-          (path == 'modules.admissoes.view' && userData().permissoes.modules.admissoes.view == true) ||
-          (path == 'modules.admissoes.create' && userData().permissoes.modules.admissoes.create == true) ||
-          (path == 'modules.admissoes.resolve' && userData().permissoes.modules.admissoes.resolve == true) ||
-          (path == 'modules.reclamacoes.view' && userData().permissoes.modules.reclamacoes.view == true) ||
-          (path == 'modules.reclamacoes.manage' && userData().permissoes.modules.reclamacoes.manage == true) ||
-          (path == 'modules.escalas.view' && userData().permissoes.modules.escalas.view == true) ||
-          (path == 'modules.escalas.manage' && userData().permissoes.modules.escalas.manage == true) ||
-          (path == 'modules.utilizadores.manage' && userData().permissoes.modules.utilizadores.manage == true) ||
-          (path == 'modules.definicoes.manage' && userData().permissoes.modules.definicoes.manage == true) ||
-          (path == 'modules.gerir-calendarios.manage' && userData().permissoes.modules['gerir-calendarios'].manage == true) ||
-          (path == 'modules.auditoria.view' && userData().permissoes.modules.auditoria.view == true)
-        );
+        && userData().permissoes.modules.get(module, {}).get(action, false) == true;
     }
 
-    function legacyPerm(path) {
+    // Compatibilidade com permissões legacy (escritas em campos raiz)
+    function legacyPerm(module, action) {
       return userData() != null
         && userData().permissoes != null
         && (
-          (path == 'modules.tarefas.create' && userData().permissoes.criarTarefas == true) ||
-          (path == 'modules.tarefas.resolve' && userData().permissoes.resolverTarefas == true) ||
-          (path == 'modules.comunicados.manage' && userData().permissoes.gerirComunicados == true) ||
-          (path == 'modules.calendario.edit' && userData().permissoes.editarCalendario == true) ||
-          (path == 'modules.admissoes.create' && userData().permissoes.criarAdmissoes == true) ||
-          (path == 'modules.admissoes.resolve' && userData().permissoes.resolverAdmissoes == true) ||
-          (path == 'modules.reclamacoes.manage' && userData().permissoes.criarReclamacoes == true)
+          (module == 'tarefas'     && action == 'create'  && userData().permissoes.criarTarefas == true) ||
+          (module == 'tarefas'     && action == 'resolve' && userData().permissoes.resolverTarefas == true) ||
+          (module == 'comunicados' && action == 'manage'  && userData().permissoes.gerirComunicados == true) ||
+          (module == 'calendario'  && action == 'edit'    && userData().permissoes.editarCalendario == true) ||
+          (module == 'admissoes'   && action == 'create'  && userData().permissoes.criarAdmissoes == true) ||
+          (module == 'admissoes'   && action == 'resolve' && userData().permissoes.resolverAdmissoes == true) ||
+          (module == 'reclamacoes' && action == 'manage'  && userData().permissoes.criarReclamacoes == true)
         );
     }
 
-    function hasPerm(path) {
-      return isAdmin() || canonicalPerm(path) || legacyPerm(path);
+    function hasPerm(module, action) {
+      return isAdmin() || canonicalPerm(module, action) || legacyPerm(module, action);
     }
 
     function officeMatches(officeId) {
@@ -84,10 +68,10 @@ service cloud.firestore {
     }
 
     match /utilizadores/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || hasPerm('modules.utilizadores.manage'));
+      allow read: if signedIn() && (request.auth.uid == uid || hasPerm('utilizadores', 'manage'));
       allow create: if signedIn() && request.auth.uid == uid;
       allow update: if signedIn() && (
-        hasPerm('modules.utilizadores.manage')
+        hasPerm('utilizadores', 'manage')
         || (request.auth.uid == uid
           && request.resource.data.diff(resource.data).changedKeys().hasOnly([
             'ultimoAcesso',
@@ -97,51 +81,57 @@ service cloud.firestore {
             'funcao'
           ]))
       );
-      allow delete: if hasPerm('modules.utilizadores.manage');
+      allow delete: if hasPerm('utilizadores', 'manage');
     }
 
     match /config/{docId} {
       allow read: if isActiveUser();
-      allow write: if hasPerm('modules.definicoes.manage');
+      allow write: if hasPerm('definicoes', 'manage');
     }
 
     match /tarefas_todo/{docId} {
-      allow read: if isActiveUser() && hasPerm('modules.tarefas.view') && officeMatches(resource.data.escritorio);
-      allow create: if isActiveUser() && hasPerm('modules.tarefas.create') && officeMatches(request.resource.data.escritorio);
+      allow read: if isActiveUser() && hasPerm('tarefas', 'view') && officeMatches(resource.data.escritorio);
+      allow create: if isActiveUser() && hasPerm('tarefas', 'create') && officeMatches(request.resource.data.escritorio);
       allow update: if isActiveUser() && (
-        (hasPerm('modules.tarefas.resolve') && officeMatches(resource.data.escritorio))
-        || (hasPerm('modules.tarefas.create')
+        (hasPerm('tarefas', 'resolve') && officeMatches(resource.data.escritorio))
+        || (hasPerm('tarefas', 'create')
           && request.resource.data.diff(resource.data).changedKeys().hasOnly(['notas'])
           && officeMatches(resource.data.escritorio))
       );
-      allow delete: if isActiveUser() && hasPerm('modules.tarefas.resolve') && officeMatches(resource.data.escritorio);
+      allow delete: if isActiveUser() && hasPerm('tarefas', 'resolve') && officeMatches(resource.data.escritorio);
     }
 
     match /comunicados/{docId} {
-      allow read: if isActiveUser() && hasPerm('modules.comunicados.view') && destinosMatch(resource.data.destinosEscritorio);
-      allow create: if isActiveUser() && hasPerm('modules.comunicados.manage');
-      allow update, delete: if isActiveUser() && hasPerm('modules.comunicados.manage');
+      allow read: if isActiveUser() && hasPerm('comunicados', 'view') && destinosMatch(resource.data.destinosEscritorio);
+      allow create: if isActiveUser() && hasPerm('comunicados', 'manage');
+      allow update, delete: if isActiveUser() && hasPerm('comunicados', 'manage');
     }
 
     match /admissoes/{docId} {
-      allow read: if isActiveUser() && hasPerm('modules.admissoes.view') && officeMatches(resource.data.escritorio);
-      allow create: if isActiveUser() && hasPerm('modules.admissoes.create') && officeMatches(request.resource.data.escritorio);
-      allow update, delete: if isActiveUser() && hasPerm('modules.admissoes.resolve') && officeMatches(resource.data.escritorio);
+      allow read: if isActiveUser() && hasPerm('admissoes', 'view') && officeMatches(resource.data.escritorio);
+      allow create: if isActiveUser() && hasPerm('admissoes', 'create') && officeMatches(request.resource.data.escritorio);
+      allow update, delete: if isActiveUser() && hasPerm('admissoes', 'resolve') && officeMatches(resource.data.escritorio);
     }
 
     match /reclamacoes_horas/{docId} {
-      allow read: if isActiveUser() && hasPerm('modules.reclamacoes.view') && officeMatches(resource.data.escritorio);
-      allow create: if isActiveUser() && hasPerm('modules.reclamacoes.manage') && officeMatches(request.resource.data.escritorio);
-      allow update, delete: if isActiveUser() && hasPerm('modules.reclamacoes.manage') && officeMatches(resource.data.escritorio);
+      allow read: if isActiveUser() && hasPerm('reclamacoes', 'view') && officeMatches(resource.data.escritorio);
+      allow create: if isActiveUser() && hasPerm('reclamacoes', 'manage') && officeMatches(request.resource.data.escritorio);
+      allow update, delete: if isActiveUser() && hasPerm('reclamacoes', 'manage') && officeMatches(resource.data.escritorio);
     }
 
     match /calendarios/{docId} {
-      allow read: if isActiveUser() && hasPerm('modules.calendario.view');
-      allow write: if isActiveUser() && hasPerm('modules.calendario.edit');
+      allow read: if isActiveUser() && hasPerm('calendario', 'view');
+      allow write: if isActiveUser() && hasPerm('calendario', 'edit');
+    }
+
+    // Escalas separadas por escritório: escalas/{escritorioId}/dias/{dateKey}
+    match /escalas/{escritorioId}/dias/{dateKey} {
+      allow read: if isActiveUser() && hasPerm('escalas', 'view') && officeMatches(escritorioId);
+      allow create, update, delete: if isActiveUser() && hasPerm('escalas', 'manage') && officeMatches(escritorioId);
     }
 
     match /auditoria/{docId} {
-      allow read: if isActiveUser() && hasPerm('modules.auditoria.view');
+      allow read: if isActiveUser() && hasPerm('auditoria', 'view');
       allow create: if isActiveUser();
       allow update, delete: if false;
     }
