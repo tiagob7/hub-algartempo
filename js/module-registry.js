@@ -44,6 +44,16 @@
         icon: '<path d="M13 2H3a1 1 0 00-1 1v9a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/>',
       },
       {
+        id: 'chat',
+        label: 'Chat',
+        href: 'chat.html',
+        order: 25,
+        adminOnly: false,
+        requiredPermissions: [],
+        usesEscritorio: false,
+        icon: '<path d="M13 2H3a1 1 0 00-1 1v9a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/><path d="M6 6h4M6 9h2"/>',
+      },
+      {
         id: 'calendario',
         label: 'Calend&aacute;rio',
         href: 'calendario.html',

@@ -14,10 +14,10 @@ ultimaMensagem: string        ← preview sem reads extra
 ultimaMensagemTs: number
 ultimaMensagemUid: string
 nome: string | null           ← só grupos
-escritorio: string | null     ← só grupos
 criadoEm: number
 criadoPor: string
 ```
+> Chat é transversal a escritórios — DMs e grupos não têm scope de escritório.
 
 ### `conversas/{conversaId}/mensagens/{msgId}`
 ```
@@ -63,6 +63,7 @@ css/chat.css           ← estilos
 - `js/module-registry.js` — registar módulo
 - `js/app-platform.js` — badge de não-lidos na navbar
 - `firestore.rules` — regras de segurança
+- `firestore.indexes.json` — 3 índices compostos necessários (ver secção Índices)
 
 ---
 
@@ -91,7 +92,7 @@ css/chat.css           ← estilos
 <script src="js/utils.js"></script>
 <script src="js/module-registry.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/auditoria.js"></script>
+<script src="js/auditoria.js"></script>   <!-- só para criação de conversa/grupo -->
 <script src="js/offices-service.js"></script>
 <script src="js/config-escritorios.js"></script>
 <script src="js/app-platform.js"></script>
@@ -133,6 +134,7 @@ css/chat.css           ← estilos
 - **Status DMs**: `✓` enviada, `✓✓` lida
 - **Composer**: `<textarea>` auto-grow (1–4 linhas), Enter envia, Shift+Enter newline
 - `.page` com `max-width: 1100px` e `padding: 0` para este módulo
+- **Scroll-to-bottom**: automático ao abrir thread e ao enviar; ao receber mensagem nova só faz scroll se já estiver a ≤100px do fundo (não interrompe quem está a ler histórico)
 
 ---
 
@@ -141,8 +143,8 @@ css/chat.css           ← estilos
 | Função | O que faz |
 |---|---|
 | `getDmId(uidA, uidB)` | ID determinístico — UIDs ordenados + `_` |
-| `getOrCreateDm(uidA, uidB)` | Cria conversa DM se não existir |
-| `createGroup(nome, escritorio, participantes)` | Cria grupo |
+| `getOrCreateDm(uidA, uidB)` | Cria conversa DM se não existir — audita criação |
+| `createGroup(nome, participantes)` | Cria grupo (sem scope de escritório) — audita criação |
 | `listenConversas(uid, cb)` | `onSnapshot` das conversas do utilizador |
 | `listenMensagens(conversaId, limit, cb)` | `onSnapshot` últimas N msgs |
 | `sendMensagem(conversaId, texto, profile)` | Batch: msg + atualiza preview na conversa |
@@ -213,10 +215,12 @@ match /conversas/{conversaId} {
 }
 
 match /chat_lidos/{docId} {
-  allow read, write: if isActiveUser()
-    && request.auth.uid == resource.data.uid;
+  // create: resource ainda não existe, usar request.resource
   allow create: if isActiveUser()
     && request.auth.uid == request.resource.data.uid;
+  // read, update, delete: resource já existe
+  allow read, update, delete: if isActiveUser()
+    && request.auth.uid == resource.data.uid;
 }
 ```
 
