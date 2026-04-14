@@ -1,51 +1,87 @@
-# Algartempo - Gestao Interna
+# Algartempo — Gestão Interna
 
-Sistema interno de gestao multi-escritorio para RH e operacoes, construido em HTML/CSS/JavaScript puro com Firebase.
+Sistema interno de gestão multi-escritório para RH e operações, construído em HTML/CSS/JavaScript puro com Firebase.
 
 ---
 
 ## O que esta app faz
 
-| Modulo | Descricao |
+| Módulo | Descrição |
 |---|---|
-| **Dashboard** | Painel geral com KPIs, layout personalizavel, pesquisa global e acesso rapido aos modulos |
-| **Tarefas** | Criacao, filtro, estado e prioridade de tarefas por escritorio |
+| **Dashboard** | Painel geral com KPIs, layout personalizável, pesquisa global e temas de cor |
+| **Tarefas** | Criação, filtro, estado e prioridade de tarefas por escritório |
 | **Comunicados** | Comunicados internos por tipo e por destino |
-| **Admissoes** | Processos de admissao e cessacao com anexos e modo gestor |
-| **Reclamacoes** | Gestao de reclamacoes de horas com exportacao e anexos |
-| **Calendario** | Editor de carga de trabalho por escritorio/departamento/mes |
-| **Escalas** | Gestao de escalas de trabalho |
-| **Utilizadores** | Criacao de contas, roles e permissoes granulares |
-| **Definicoes** | Gestao de escritorios e acesso aos modulos administrativos |
-| **Gerir Calendarios** | Publicacao e manutencao dos calendarios |
-| **Auditoria** | Historico das alteracoes da app |
+| **Admissões** | Processos de admissão e cessação com anexos e modo gestor |
+| **Reclamações** | Gestão de reclamações de horas com exportação e anexos |
+| **Calendário** | Editor de carga de trabalho por escritório/departamento/mês |
+| **Escalas** | Gestão de escalas de trabalho |
+| **Utilizadores** | Criação de contas, roles e permissões granulares |
+| **Definições** | Gestão de escritórios, seed de dados e acesso a módulos administrativos |
+| **Gerir Calendários** | Publicação e manutenção dos calendários |
+| **Auditoria** | Histórico das alterações da app |
 
 ---
 
 ## Stack
 
 - **Frontend:** HTML5, CSS3, JavaScript ES6+ sem framework
+- **Fontes:** Inter (corpo/UI) + Poppins (títulos/headings)
 - **Auth:** Firebase Authentication (Email/Password)
 - **Base de dados:** Firestore
 - **Storage:** Firebase Storage
 - **Tempo real:** listeners Firestore com `onSnapshot()`
-- **UI partilhada:** scripts globais carregados por pagina
-- **Seguranca:** `firestore.rules` com controlo por utilizador, permissao e escritorio
+- **UI partilhada:** scripts globais carregados por página
+- **Segurança:** `firestore.rules` com controlo por utilizador, permissão e escritório
 
 ---
 
-## Paginas fora de ambito
+## Visual e temas
 
-Estas paginas existem no repositorio mas sao tratadas como testes/prototipos e **nao fazem parte da base principal atual**:
+### Sistema de fontes
 
-- `reclamacao-bot.html`
-- `reclamacao-bot2.html`
-- `reclamacao-publica.html`
-- `reclamacao-publica2.html`
-- `separador_recibos_v11.2.html`
-- `voz-teste.html`
+Toda a app usa:
+- **Inter** — corpo de texto, inputs, botões, labels
+- **Poppins** — títulos (`h1`, headings de painéis, nomes em negrito)
 
-Ao evoluir a arquitetura principal, estas paginas podem ser ignoradas.
+### Tokens de cor base
+
+```css
+--bg: #f1f5f9      /* fundo da página */
+--surface: #fff    /* cards e painéis */
+--border: #e2e8f0  /* bordas */
+--text: #0f172a    /* texto principal */
+--muted: #94a3b8   /* texto secundário */
+--accent: #0284c7  /* cor de ação (muda com o tema) */
+```
+
+### Temas de cor
+
+O dashboard tem um personalizador com 4 temas. O tema ativo é guardado em Firestore (`preferencias.dashboard.themePreset`) e aplicado em todas as páginas via atributo `data-theme` no `<html>`.
+
+| Tema | Accent | Sidebar |
+|---|---|---|
+| `default` | Sky blue `#0284c7` | Navy `#0f172a` |
+| `forest` | Teal `#0f766e` | Dark teal `#12312b` |
+| `sunset` | Orange `#c2410c` | Dark brown `#3c1f12` |
+| `violet` | Violet `#7c3aed` | Dark purple `#21163d` |
+
+O ficheiro `js/dashboard-customizer.js` gere a selecção e persistência do tema.
+
+### Arquitectura CSS
+
+Existem duas estratégias de CSS conforme a página:
+
+**Páginas que carregam `styles.css`** (base partilhada):
+`tarefas`, `admissoes`, `reclamacoes`, `utilizadores`, `auditoria`, `seed`
+
+**Páginas com CSS standalone** (têm o seu próprio `@import` e `:root`):
+`comunicados`, `calendario`, `gerir-calendarios`, `escalas`, `definicoes`
+
+Ambas as estratégias têm os blocos `[data-theme]` para que a cor de destaque mude com o tema seleccionado. Os ficheiros CSS standalone também incluem estes overrides directamente.
+
+### Botões primários
+
+Todos os botões de acção primária usam `background: var(--accent)`, que muda automaticamente com o tema. Nunca usar `background: var(--text)` para botões de acção.
 
 ---
 
@@ -53,118 +89,106 @@ Ao evoluir a arquitetura principal, estas paginas podem ser ignoradas.
 
 ### 1. Base comum da app
 
-A app passou a ter uma camada comum para suportar modulos novos sem repetir logica:
-
-| Ficheiro | Funcao |
+| Ficheiro | Função |
 |---|---|
-| `js/module-registry.js` | Registry central dos modulos da app, com id, rota, grupo, ordem e regras de visibilidade |
-| `js/users-service.js` | Servico comum de utilizadores, com criacao de contas, updates, permissoes e listeners |
-| `js/offices-service.js` | Servico comum de escritorios, com leitura, escrita, ordenacao e remocao com cleanup |
-| `js/tasks-service.js` | Servico de dominio para tarefas |
-| `js/comunicados-service.js` | Servico de dominio para comunicados |
-| `js/config-escritorios.js` | Servico comum de escritorios, com cache, escritorio default, escritorios ativos e helpers de consulta |
-| `js/app-platform.js` | Camada de plataforma para navbar, escritorio ativo, bootstrap comum de paginas protegidas e integracao da navegacao com o registry |
-| `js/auth.js` | Autenticacao, sessao e helpers de permissao |
-| `js/utils.js` | Utilitarios partilhados |
-| `js/auditoria.js` | Registo de alteracoes no Firestore |
+| `js/firebase-init.js` | Inicialização do Firebase |
+| `js/utils.js` | Utilitários partilhados (datas, UI, strings) |
+| `js/auth.js` | Autenticação, sessão e helpers de permissão |
+| `js/auditoria.js` | Registo de alterações no Firestore |
+| `js/users-service.js` | Serviço de utilizadores (CRUD, listeners, permissões) |
+| `js/offices-service.js` | Serviço de escritórios (CRUD, ordenação, cleanup) |
+| `js/tasks-service.js` | Serviço de domínio para tarefas |
+| `js/comunicados-service.js` | Serviço de domínio para comunicados |
+| `js/config-escritorios.js` | Cache e helpers de escritório activo |
+| `js/module-registry.js` | Registry central dos módulos (navegação, ordem, visibilidade) |
+| `js/app-platform.js` | Bootstrap, navbar, sidebar, topbar e listeners de plataforma |
+| `js/dashboard-customizer.js` | Gestão de temas de cor e personalização do dashboard |
 
 ### 2. Entidades nucleares
 
-Os dois pilares de integracao da app sao:
+Os dois pilares da app são **Utilizadores** e **Escritórios**. Qualquer módulo novo deve encaixar na mesma lógica de:
 
-- **Utilizadores**
-- **Escritorios**
+- autenticação e sessão
+- permissões por role/utilizador
+- escritório activo como âmbito
+- navegação via module registry
+- auditoria de alterações
 
-Isto significa que qualquer ferramenta nova deve encaixar na mesma logica de:
+### 3. Shell da app
 
-- autenticacao
-- permissao
-- escritorio ativo
-- navegacao
-- auditoria
+O `app-platform.js` injeta automaticamente em todas as páginas protegidas:
 
-### 3. Criadores principais
+- **Sidebar** esquerda com navegação por módulo (cor muda com tema)
+- **Topbar** com título da página, escritório activo e avatar do utilizador
+- **Menu mobile** de módulos
 
-As paginas mais importantes para a expansao da app sao:
-
-- [utilizadores.html](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/utilizadores.html)
-- [definicoes.html](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/definicoes.html)
-
-Elas nao sao apenas paginas administrativas. Funcionam como ponto de entrada para a configuracao comum que os modulos novos vao reutilizar.
+O item activo na sidebar usa cores adaptadas ao tema seleccionado.
 
 ---
 
 ## Estrutura principal de ficheiros
 
 ```text
-Calendario/
-|
-|-- styles.css
-|-- css/
-|   |-- dashboard.css
-|   |-- tarefas.css
-|   |-- comunicados.css
-|   |-- admissoes.css
-|   |-- reclamacoes.css
-|   |-- calendario.css
-|   |-- escalas.css
-|   |-- definicoes.css
-|   |-- utilizadores.css
-|   |-- gerir-calendarios.css
-|   `-- auditoria.css
-|
-|-- js/
-|   |-- firebase-init.js
-|   |-- utils.js
-|   |-- auth.js
-|   |-- auditoria.js
-|   |-- users-service.js
-|   |-- offices-service.js
-|   |-- tasks-service.js
-|   |-- comunicados-service.js
-|   |-- config-escritorios.js
-|   |-- module-registry.js
-|   |-- app-platform.js
-|   |-- dashboard.js
-|   |-- tarefas.js
-|   |-- comunicados.js
-|   |-- admissoes.js
-|   |-- reclamacoes.js
-|   |-- calendario.js
-|   |-- escalas.js
-|   |-- definicoes.js
-|   |-- utilizadores.js
-|   |-- gerir-calendarios.js
-|   `-- auditoria-page.js
-|
-|-- dashboard.html
-|-- tarefas.html
-|-- comunicados.html
-|-- admissoes.html
-|-- reclamacoes.html
-|-- calendario.html
-|-- escalas.html
-|-- definicoes.html
-|-- utilizadores.html
-|-- gerir-calendarios.html
-`-- auditoria.html
+hub-algartempo/
+│
+├── styles.css                  ← base partilhada (Inter, tokens, temas, componentes)
+├── login.html
+├── dashboard.html
+├── seed.html
+│
+├── css/
+│   ├── login.css
+│   ├── dashboard.css
+│   ├── comunicados.css         ← standalone (tem :root próprio + temas)
+│   ├── calendario.css          ← standalone
+│   ├── gerir-calendarios.css   ← standalone
+│   ├── escalas.css             ← standalone
+│   ├── definicoes.css          ← standalone
+│   ├── tarefas.css             ← usa styles.css como base
+│   ├── admissoes.css           ← usa styles.css como base
+│   ├── reclamacoes.css         ← usa styles.css como base
+│   ├── utilizadores.css        ← usa styles.css como base
+│   └── auditoria.css           ← usa styles.css como base
+│
+├── js/
+│   ├── firebase-init.js
+│   ├── utils.js
+│   ├── auth.js
+│   ├── auditoria.js
+│   ├── users-service.js
+│   ├── offices-service.js
+│   ├── tasks-service.js
+│   ├── comunicados-service.js
+│   ├── config-escritorios.js
+│   ├── module-registry.js
+│   ├── app-platform.js
+│   ├── dashboard-customizer.js
+│   ├── dashboard.js
+│   ├── tarefas.js
+│   ├── comunicados.js
+│   ├── admissoes.js
+│   ├── reclamacoes.js
+│   ├── calendario.js
+│   ├── escalas.js
+│   ├── definicoes.js
+│   ├── utilizadores.js
+│   ├── gerir-calendarios.js
+│   └── auditoria-page.js
+│
+├── templates/
+│   ├── module-template.html
+│   ├── module-template.js
+│   └── module-template.css
+│
+├── firestore.rules
+├── storage.rules
+├── firebase.json
+└── .firebaserc
 ```
-
-Tambem existe agora:
-
-- `.firebaserc`
-- `firestore.rules`
-- `storage.rules`
-- `firebase.json`
-- `templates/module-template.html`
-- `templates/module-template.js`
-- `templates/module-template.css`
 
 ---
 
-## Ordem de carregamento nas paginas protegidas
-
-Ordem recomendada:
+## Ordem de carregamento nas páginas protegidas
 
 ```html
 <!-- Firebase -->
@@ -181,70 +205,24 @@ Ordem recomendada:
 <script src="js/config-escritorios.js"></script>
 <script src="js/app-platform.js"></script>
 
-<!-- Modulo da pagina -->
+<!-- Módulo da página -->
 <script src="js/[pagina].js"></script>
 ```
 
-Notas:
+---
 
-- `module-registry.js` define os modulos e a sua ordem/visibilidade.
-- `offices-service.js` guarda a logica principal de escritorios.
-- `tasks-service.js` e `comunicados-service.js` sao os primeiros services de dominio e mostram o padrao para extrair Firestore das paginas.
-- `config-escritorios.js` funciona como camada de compatibilidade para a API global ja usada pelos modulos.
-- `app-platform.js` cola a navegacao, o escritorio ativo e o bootstrap das paginas ao resto da app.
-
-### Firestore Rules
-
-O projeto passa a ter uma base inicial em [firestore.rules](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/firestore.rules) com estas ideias:
-
-- leitura/escrita apenas para utilizadores autenticados
-- perfil de utilizador como fonte de verdade para `role`, `ativo` e `permissoes`
-- controlo por modulo
-- controlo por escritorio quando aplicavel
-- fallback legacy para as permissoes antigas durante a migracao
-
-Estas rules sao uma primeira base e devem ser revistas antes de deploy final, especialmente para anexos, auditoria e colecoes que ainda nao foram totalmente migradas para services.
-
-### Firebase CLI
-
-O workspace ja ficou preparado para o projeto Firebase:
-
-- `projectId`: `hub-algartempo`
-- default local em [/.firebaserc](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/.firebaserc)
-- config em [firebase.json](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/firebase.json)
-- web app configurada em [js/firebase-init.js](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/js/firebase-init.js)
-
-Comandos uteis:
-
-```bash
-cmd /c firebase login --reauth
-cmd /c firebase use hub-algartempo
-cmd /c firebase deploy --only firestore:rules
-cmd /c firebase deploy --only storage
-```
-
-Se quiseres testar localmente:
-
-```bash
-cmd /c firebase emulators:start --only firestore,storage
-```
-
-### Bootstrap comum
-
-As paginas protegidas devem arrancar com `window.bootProtectedPage(...)` em vez de registarem toda a logica de auth manualmente.
-
-Exemplo:
+## Bootstrap de páginas protegidas
 
 ```js
 window.bootProtectedPage({
   activePage: 'tarefas',
   moduleId: 'tarefas',
 }, ({ profile, isAdmin, escritorio }) => {
-  // inicializacao da pagina
+  // inicialização da página
 });
 ```
 
-Se a pagina for administrativa:
+Para páginas administrativas (apenas admins):
 
 ```js
 window.bootProtectedPage({
@@ -252,45 +230,16 @@ window.bootProtectedPage({
   moduleId: 'utilizadores',
   requireAdmin: true,
 }, ({ profile }) => {
-  // inicializacao da pagina
+  // só admins chegam aqui
 });
 ```
 
 ---
 
-## Regra para modulos novos
+## Regra para módulos novos
 
-Quando fores criar uma ferramenta nova, a ideia agora e esta:
-
-1. Criar a pagina HTML e o JS/CSS do modulo.
-2. Adicionar o modulo ao `js/module-registry.js`.
-3. Carregar a stack comum da app.
-4. Usar a mesma logica de escritorio ativo e permissao.
-
-### Permissoes por modulo
-
-A app passou a suportar permissoes canonicas por modulo, por exemplo:
-
-- `modules.tarefas.view`
-- `modules.tarefas.create`
-- `modules.tarefas.resolve`
-- `modules.comunicados.manage`
-- `modules.admissoes.create`
-- `modules.admissoes.resolve`
-- `modules.calendario.edit`
-
-As permissoes antigas continuam a funcionar por compatibilidade, mas o padrao novo para modulos futuros deve usar as chaves `modules.<modulo>.<acao>`.
-
-### Exemplo minimo
-
-Se criares um modulo novo `frota.html`:
-
-1. Criar:
-   - `frota.html`
-   - `js/frota.js`
-   - `css/frota.css`
-
-2. Registar em `js/module-registry.js` algo do genero:
+1. Criar `[modulo].html`, `js/[modulo].js`, `css/[modulo].css`
+2. Registar em `js/module-registry.js`:
 
 ```js
 {
@@ -305,136 +254,98 @@ Se criares um modulo novo `frota.html`:
 }
 ```
 
-3. Na pagina, carregar a base comum antes do script do modulo.
-
-4. No JS do modulo, assumir:
-   - `window.userProfile`
-   - `window.temPermissao()`
-   - `window.escritorioAtivo()`
-   - `window.loadEscritorios()`
-   - `window.renderNavbar()`
-   - `window.bootProtectedPage()`
-
-5. Se o modulo tiver dados proprios, criar um service dedicado em `js/<modulo>-service.js`.
-
-6. Podes partir do template em:
-   - [module-template.html](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/templates/module-template.html)
-   - [module-template.js](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/templates/module-template.js)
-   - [module-template.css](C:/Users/Tiago/Documents/GitHub/CalendarioGPT/Calendario/templates/module-template.css)
-
-Isto faz com que o novo modulo entre na mesma logica de navegacao e segmentacao.
+3. Carregar a stack comum antes do script do módulo
+4. Usar `window.bootProtectedPage()` no JS do módulo
+5. Se tiver dados próprios, criar `js/[modulo]-service.js`
+6. Para CSS standalone: copiar o bloco `:root` + `[data-theme]` de um módulo existente
+7. Partir dos templates em `templates/`
 
 ---
 
-## Logica de escritorios
+## APIs globais disponíveis
 
-Os escritorios vivem em:
-
-- `config/escritorios`
-
-Formato esperado da lista:
-
-```js
-[
-  {
-    id: 'quarteira',
-    nome: 'Quarteira',
-    cor: '#2563eb',
-    default: true,
-    ativo: true,
-    ordem: 10
-  }
-]
-```
-
-### Campos
-
-- `id`: identificador interno estavel
-- `nome`: nome visivel
-- `cor`: cor usada na UI
-- `default`: escritorio por omissao
-- `ativo`: se entra nos modulos e filtros
-- `ordem`: ordem de apresentacao
-
-### Regras
-
-- Escritorios inativos nao devem aparecer nos fluxos normais.
-- O escritorio default serve de fallback quando necessario.
-- Novos modulos devem consumir a lista via `loadEscritorios()` e nao via arrays hardcoded.
+| API | Função |
+|---|---|
+| `window.userProfile` | Objeto do utilizador autenticado |
+| `window.temPermissao(p)` | Verifica permissão |
+| `window.escritorioAtivo()` | ID do escritório activo |
+| `window.loadEscritorios()` | Lista de escritórios |
+| `window.renderNavbar(page)` | Re-renderiza sidebar + topbar |
+| `window.db` | Referência Firestore |
+| `window.isAdmin()` | Verifica se é admin |
 
 ---
 
-## Logica de utilizadores
+## Sistema de permissões
 
-Colecao:
+### Permissões actuais (em uso)
 
-- `utilizadores/{uid}`
-
-Campos principais:
-
-- `uid`
-- `nome`
-- `apelido`
-- `nomeCompleto`
-- `email`
-- `escritorio`
-- `role`
-- `ativo`
-- `permissoes{}`
-- `ultimoAcesso`
-
-### Regras de negocio atuais
-
-- `admin` ve todos os modulos e tem todas as permissoes.
-- `colaborador` depende das permissoes atribuidas.
-- O escritorio do utilizador define o seu escopo normal na app.
-
----
-
-## Sistema de permissoes atual
-
-Permissoes existentes:
-
-| Permissao | Permite |
+| Permissão | Permite |
 |---|---|
 | `criarTarefas` | Criar tarefas |
 | `resolverTarefas` | Alterar estado de tarefas |
 | `gerirComunicados` | Criar, editar e arquivar comunicados |
-| `criarAdmissoes` | Criar processos de admissao/cessacao |
-| `resolverAdmissoes` | Alterar estado de admissoes/cessacoes |
-| `editarCalendario` | Editar calendario de trabalho |
-| `criarReclamacoes` | Criar reclamacoes internas de horas |
+| `criarAdmissoes` | Criar processos de admissão/cessação |
+| `resolverAdmissoes` | Alterar estado de admissões/cessações |
+| `editarCalendario` | Editar calendário de trabalho |
+| `criarReclamacoes` | Criar reclamações internas de horas |
 
-No futuro, a recomendacao e evoluir para permissoes mais orientadas por modulo, mas a base atual continua funcional.
+### Permissões canónicas (para módulos novos)
+
+Padrão: `modules.<modulo>.<acao>`
+
+Exemplos: `modules.frota.view`, `modules.frota.create`, `modules.frota.edit`
 
 ---
 
-## Configuracao inicial
+## Lógica de escritórios
 
-### 1. Ativar Authentication
+Guardados em `config/escritorios`. Formato:
 
-1. Abrir o projeto no Firebase Console
-2. Ir a `Authentication`
-3. Ativar `Email/Password`
+```js
+{
+  id: 'quarteira',
+  nome: 'Quarteira',
+  cor: '#0284c7',
+  default: true,
+  ativo: true,
+  ordem: 10
+}
+```
 
-### 2. Criar o primeiro admin
+Escritórios inativos não aparecem nos módulos. O escritório default serve de fallback. Novos módulos devem consumir via `loadEscritorios()`, nunca arrays hardcoded.
 
-Opcao simples:
+---
 
-1. Abrir `login.html`
-2. Criar conta
-3. Promover manualmente no Firestore:
-   - `utilizadores/{uid}.role = "admin"`
+## Firestore Rules
 
-### 3. Configurar escritorios
+Ficheiro: `firestore.rules`
 
-Pela app:
+- Leitura/escrita apenas para utilizadores autenticados
+- Perfil do utilizador como fonte de verdade para `role`, `ativo` e `permissoes`
+- Controlo por módulo e por escritório quando aplicável
+- Fallback legacy para permissões antigas durante migração
 
-- `definicoes.html` -> painel `Escritorios`
+Estas rules são uma primeira base e devem ser revistas antes de deploy final.
 
-Ou diretamente no Firestore:
+---
 
-- `config/escritorios`
+## Firebase CLI
+
+- **projectId:** `hub-algartempo`
+
+```bash
+firebase login --reauth
+firebase use hub-algartempo
+firebase deploy --only firestore:rules
+firebase deploy --only storage
+```
+
+Testar localmente:
+
+```bash
+firebase emulators:start --only firestore,storage
+```
 
 ---
 
@@ -448,35 +359,21 @@ Com VS Code + Live Server:
 
 ---
 
-## Limitacoes conhecidas
+## Limitações conhecidas
 
 | Item | Estado |
 |---|---|
-| Firestore Security Rules | Ainda precisam de endurecimento antes de producao |
-| Permissoes | Ainda estao muito centradas no frontend |
-| Dashboard | Ainda ha zonas com leitura ampla e filtro no cliente |
-| Criacao de utilizadores | Continua a ser feita do cliente admin |
-| Integracoes de teste | Mantidas no repo mas fora do fluxo principal |
+| Firestore Security Rules | Precisam de endurecimento antes de produção |
+| Permissões | Ainda centradas no frontend |
+| Criação de utilizadores | Feita do lado do cliente admin |
+| Dark mode | Estrutura preparada (classe `.dark`) mas não implementado |
 
 ---
 
-## Proximos passos recomendados
+## Próximos passos recomendados
 
 - [ ] Endurecer Firestore Rules e Storage Rules
-- [ ] Migrar criacao de utilizadores para backend/server-side quando for altura
-- [ ] Evoluir o sistema de permissoes para uma convencao por modulo
-- [ ] Fazer o dashboard consumir mais configuracao do registry e menos hardcode visual
-- [ ] Criar um template oficial para modulos novos
-- [ ] Adicionar testes para fluxos criticos de auth, escritorio e permissoes
-
----
-
-## Resumo pratico
-
-Hoje a app ja tem uma base comum para crescer:
-
-- os **utilizadores** definem acesso e escopo
-- os **escritorios** definem segmentacao e organizacao
-- o **module registry** define como cada ferramenta entra na app
-
-Ou seja: a partir daqui, criar uma nova ferramenta deve passar por integrar no mesmo sistema, e nao por reinventar autenticacao, escritorio, navbar ou permissao em cada pagina.
+- [ ] Migrar criação de utilizadores para backend/server-side
+- [ ] Evoluir permissões para convenção canónica por módulo
+- [ ] Implementar dark mode (variáveis e lógica de toggle já previstas)
+- [ ] Adicionar testes para fluxos críticos de auth, escritório e permissões

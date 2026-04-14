@@ -9,6 +9,7 @@ let carregando    = false;
 
 // ── Auth ready ──────────────────────────────────────────
 document.addEventListener('authReady', async () => {
+  window.renderNavbar('auditoria');
   if (!window.isAdmin()) {
     document.querySelector('.page').innerHTML = `
       <div class="empty-state">

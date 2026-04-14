@@ -6,7 +6,7 @@
 
 /* STATS ROW */
 .stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:10px;display:flex;align-items:center;gap:6px;color:var(--muted);}
-.stat-pill strong{font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--text);}
+.stat-pill strong{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:var(--text);}
 
 /* TIMELINE */
 .timeline{position:relative;padding-left:28px;}

@@ -3,6 +3,11 @@ const col = window.ReclamacoesService.proxy();
 const storage = firebase.storage();
 window._files = {};
 
+function toggleFormRec() {
+  const panel = document.getElementById('formPanel');
+  if (panel) panel.classList.toggle('open');
+}
+
 let recs=[], filtroEstado='ativos', filtroEscritorio='', selCanalVal='email';
 const expandedIds = new Set();
 
@@ -331,7 +336,11 @@ document.addEventListener('authReady',({detail})=>{
   window.renderNavbar('reclamacoes');
   const profile=detail.profile,isAdmin=window.isAdmin(),canCreate=window.temPermissao('modules.reclamacoes.manage');
   if(profile) document.getElementById('userName').textContent=profile.nomeCompleto||profile.nome||profile.email||'?';
-  if(canCreate){document.getElementById('formPanel').style.display='';adicionarPeriodo();}
+  if(canCreate){
+    // Mostrar o painel colapsado por defeito (utilizador expande quando quiser)
+    document.getElementById('formPanel').style.display='';
+    adicionarPeriodo();
+  }
   filtroEscritorio=isAdmin?'':(profile?(profile.escritorio||''):'');
   window.loadEscritorios().then(lista=>{
     const fEsc=document.getElementById('fEscritorio');
@@ -412,7 +421,11 @@ async function submitReclamacao(){
     }
     pendingFiles = [];
     renderPendingFilesList();
-    limparForm(); toast('✓ Reclamação registada com sucesso!');
+    limparForm();
+    // Fechar o painel após submeter com sucesso
+    const fp = document.getElementById('formPanel');
+    if (fp) fp.classList.remove('open');
+    toast('✓ Reclamação registada com sucesso!');
   }catch(e){console.error(e);toast('Erro ao registar.');}
   finally{if(btn) btn.disabled=false;}
 }

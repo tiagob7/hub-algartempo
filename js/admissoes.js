@@ -1,5 +1,10 @@
 const GESTOR_PIN = '9005';
 const db      = firebase.firestore();
+
+function toggleFormAdm() {
+  const panel = document.getElementById('formAdmissoes');
+  if (panel) panel.classList.toggle('open');
+}
 const col     = window.AdmissoesService.proxy();
 const storage = firebase.storage();
 window._files = {};
@@ -159,9 +164,14 @@ async function submitProcesso() {
       if (statusEl) statusEl.textContent = '';
     }
 
+    _invalidateAdmCache(); // novo processo → forçar re-leitura
     pendingFilesAdm = [];
     renderPendingFilesAdmList();
     resetForm();
+    // Fechar o painel após submeter com sucesso
+    const fp = document.getElementById('formAdmissoes');
+    if (fp) fp.classList.remove('open');
+    startSync(); // recarregar lista
     toast('✓ Processo submetido!');
   } catch(e) {
     console.error(e);
@@ -193,6 +203,10 @@ async function updateEstado(id, val) {
     const snap = await col.doc(id).get();
     const antes = snap.data();
     await col.doc(id).update({ estado: val });
+    _invalidateAdmCache(); // estado alterado → forçar re-leitura
+    // atualizar localmente sem re-fetch para resposta imediata
+    const proc = processos.find(p => p.id === id);
+    if (proc) { proc.estado = val; render(); }
     await registarAuditoria({
       modulo: 'admissoes', acao: 'estado',
       docId: id,
@@ -581,20 +595,39 @@ document.addEventListener('authReady', ({ detail }) => {
   startSync();
 });
 
+// ── Cache de admissões ────────────────────────────────────────────────────────
+// TTL de 3 min: processos mudam com moderada frequência.
+// Cache é invalidado ao criar/atualizar um processo.
+const _admCache = { ts: 0 };
+const ADM_CACHE_TTL = 3 * 60 * 1000; // 3 minutos
+
+function _admCacheValid() {
+  return processos.length > 0 && (Date.now() - _admCache.ts) < ADM_CACHE_TTL;
+}
+
+function _invalidateAdmCache() { _admCache.ts = 0; }
+
 function startSync() {
-  if (window._admissoesUnsub) window._admissoesUnsub();
-  setStatus('A ligar…', '#f59e0b');
-  const unsub = col.orderBy('criadoEm', 'desc').limit(200).onSnapshot(snap => {
-    processos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Se cache válido → apenas re-renderizar
+  if (_admCacheValid()) {
     render();
-    setStatus('✓ Sincronizado', '#16a34a');
-    setTimeout(() => setStatus(''), 3000);
-  }, err => {
-    console.error(err);
-    setStatus('Erro de ligação', '#dc2626');
-  });
-  window._admissoesUnsub = unsub;
-  window.addEventListener('beforeunload', () => { if (window._admissoesUnsub) window._admissoesUnsub(); }, { once: true });
+    setStatus('✓ Carregado', '#16a34a');
+    setTimeout(() => setStatus(''), 2000);
+    return;
+  }
+  setStatus('A carregar…', '#f59e0b');
+  col.orderBy('criadoEm', 'desc').limit(100).get()
+    .then(snap => {
+      processos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      _admCache.ts = Date.now();
+      render();
+      setStatus('✓ Carregado', '#16a34a');
+      setTimeout(() => setStatus(''), 3000);
+    })
+    .catch(err => {
+      console.error(err);
+      setStatus('Erro de ligação', '#dc2626');
+    });
 }
 
 // ── VOZ AI — helpers e registo do tipo 'admissao' ──

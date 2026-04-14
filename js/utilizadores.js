@@ -3,6 +3,43 @@ let roleFilter = '';
 let escritorioFilter = '';
 let searchFilter = '';
 
+// ── Cache de utilizadores ─────────────────────────────────────────────────────
+// Página admin: usada com pouca frequência; .get() único é suficiente.
+// O botão "↺ Atualizar" força nova leitura quando necessário.
+const _utilCache = { ts: 0 };
+const UTIL_CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
+function _utilCacheValid() {
+  return users.length > 0 && (Date.now() - _utilCache.ts) < UTIL_CACHE_TTL;
+}
+
+function carregarUtilizadores() {
+  if (_utilCacheValid()) {
+    renderUsers();
+    setStatus('✓ ' + users.length + ' utilizador(es) — cache', '#16a34a');
+    setTimeout(() => setStatus(''), 3000);
+    return;
+  }
+  setStatus('A carregar…', '#f59e0b');
+  window.UsersService.listAll()
+    .then(nextUsers => {
+      users = nextUsers;
+      _utilCache.ts = Date.now();
+      renderUsers();
+      setStatus('✓ ' + users.length + ' utilizador(es)', '#16a34a');
+      setTimeout(() => setStatus(''), 3000);
+    })
+    .catch(err => {
+      console.error('[utilizadores] Erro ao carregar:', err);
+      setStatus('Erro ao carregar: ' + (err.code || err.message), '#dc2626');
+    });
+}
+
+function refreshUtilizadores() {
+  _utilCache.ts = 0; // invalidar cache
+  carregarUtilizadores();
+}
+
 const PERMS_DEF = (window.getPermissionDefinitions ? window.getPermissionDefinitions() : [])
   .filter(def => ![
     'modules.tarefas.view',
@@ -290,8 +327,10 @@ async function criarUtilizador() {
       password,
     });
 
+    _utilCache.ts = 0; // novo utilizador → forçar re-leitura
     fecharModalNovo();
     toast('Conta criada com sucesso para ' + email + '.');
+    carregarUtilizadores(); // recarregar lista
   } catch (err) {
     console.error('[criarUtilizador]', err);
     const msgs = {
@@ -315,28 +354,26 @@ window.bootProtectedPage({
   const meInfo = document.getElementById('meInfo');
   if (meInfo) meInfo.textContent = 'Sessao iniciada como Admin: ' + me;
 
-  setStatus('A ligar...', '#f59e0b');
-
   window.loadEscritorios({ includeInactive: true }).then(() => {
     renderOfficeOptions();
   });
 
-  const unsubscribe = window.UsersService.listenAll({
-    limit: 500,
-    onData(nextUsers) {
-      users = nextUsers;
-      renderUsers();
-      setStatus('Sincronizado - ' + users.length + ' doc(s) no Firestore', '#16a34a');
-      setTimeout(() => setStatus(''), 5000);
-    },
-    onError(err) {
-      console.error('[utilizadores] Erro no onSnapshot:', err);
-      setStatus('Erro ao carregar: ' + err.code, '#dc2626');
-    },
-  });
+  // Injetar botão "↺ Atualizar" junto ao status, se ainda não existir
+  setTimeout(() => {
+    const statusEl = document.getElementById('statusBar') || document.querySelector('.status-bar');
+    if (statusEl && !document.getElementById('btnRefreshUtil')) {
+      const btn = document.createElement('button');
+      btn.id = 'btnRefreshUtil';
+      btn.title = 'Forçar atualização da lista';
+      btn.textContent = '↺ Atualizar';
+      btn.style.cssText = 'margin-left:10px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;color:var(--muted);font-family:inherit;';
+      btn.onmouseover = () => { btn.style.borderColor = 'var(--accent)'; btn.style.color = 'var(--accent)'; };
+      btn.onmouseout  = () => { btn.style.borderColor = 'var(--border)';  btn.style.color = 'var(--muted)'; };
+      btn.onclick = () => refreshUtilizadores();
+      statusEl.appendChild(btn);
+    }
+  }, 500);
 
-  window._utilUnsub = unsubscribe;
-  window.addEventListener('beforeunload', () => {
-    if (window._utilUnsub) window._utilUnsub();
-  }, { once: true });
+  // Usar .get() em vez de onSnapshot — elimina listener permanente de 500 docs
+  carregarUtilizadores();
 });

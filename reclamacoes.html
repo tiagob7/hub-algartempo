@@ -19,55 +19,60 @@
 
   <!-- FORM -->
   <div class="form-panel" id="formPanel" style="display:none">
-    <div class="panel-title">
+    <div class="panel-title panel-toggle" onclick="toggleFormRec()">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v4l2.5 1.5"/></svg>
       Nova Reclamação
+      <span class="panel-toggle-chevron">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </span>
     </div>
-    <div class="section-label">Dados do trabalhador temporário</div>
-    <div class="form-grid">
-      <div><label class="field-label">Nº de funcionário</label><input type="text" class="form-input" id="fNumFunc" placeholder="ex: 12345" autocomplete="off"></div>
-      <div><label class="field-label">NIF<span class="req">*</span></label><input type="text" class="form-input" id="fNif" placeholder="ex: 123456789" maxlength="9" autocomplete="off"></div>
-      <div class="full"><label class="field-label">Nome completo<span class="req">*</span></label><input type="text" class="form-input" id="fNome" placeholder="ex: João Silva" autocomplete="off"></div>
-      <div><label class="field-label">Categoria profissional</label><input type="text" class="form-input" id="fCategoria" placeholder="ex: Operador de armazém" autocomplete="off"></div>
-      <div><label class="field-label">Empresa utilizadora<span class="req">*</span></label><input type="text" class="form-input" id="fEmpresa" placeholder="ex: Empresa ABC Lda" autocomplete="off"></div>
-      <div><label class="field-label">Escritório</label><select class="form-select" id="fEscritorio"><option value="">A carregar…</option></select></div>
-    </div>
-
-    <div class="divider"></div>
-    <div class="section-label">Períodos reclamados<span class="req">*</span></div>
-    <div class="periodos-wrap" id="periodosWrap"></div>
-    <button class="btn-add-periodo" onclick="adicionarPeriodo()">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
-      Adicionar período
-    </button>
-
-    <div class="divider"></div>
-    <div class="section-label">Entrada da reclamação</div>
-    <div class="form-grid">
-      <div class="full">
-        <label class="field-label">Canal de entrada<span class="req">*</span></label>
-        <div class="canal-row">
-          <button class="canal-pill sel" data-c="email" onclick="selCanal('email')">📧 Email</button>
-          <button class="canal-pill" data-c="telefone" onclick="selCanal('telefone')">📞 Telefone</button>
-          <button class="canal-pill" data-c="mensagem" onclick="selCanal('mensagem')">💬 Mensagem</button>
-          <button class="canal-pill" data-c="presencial" onclick="selCanal('presencial')">🧑 Presencial</button>
-        </div>
+    <div class="form-panel-body">
+      <div class="section-label">Dados do trabalhador temporário</div>
+      <div class="form-grid">
+        <div><label class="field-label">Nº de funcionário</label><input type="text" class="form-input" id="fNumFunc" placeholder="ex: 12345" autocomplete="off"></div>
+        <div><label class="field-label">NIF<span class="req">*</span></label><input type="text" class="form-input" id="fNif" placeholder="ex: 123456789" maxlength="9" autocomplete="off"></div>
+        <div class="full"><label class="field-label">Nome completo<span class="req">*</span></label><input type="text" class="form-input" id="fNome" placeholder="ex: João Silva" autocomplete="off"></div>
+        <div><label class="field-label">Categoria profissional</label><input type="text" class="form-input" id="fCategoria" placeholder="ex: Operador de armazém" autocomplete="off"></div>
+        <div><label class="field-label">Empresa utilizadora<span class="req">*</span></label><input type="text" class="form-input" id="fEmpresa" placeholder="ex: Empresa ABC Lda" autocomplete="off"></div>
+        <div><label class="field-label">Escritório</label><select class="form-select" id="fEscritorio"><option value="">A carregar…</option></select></div>
       </div>
-      <div class="full"><label class="field-label">Notas internas</label><textarea class="form-textarea" id="fNotas" placeholder="ex: Trabalhador diz que fez turno extra na sexta, não registado no ponto…"></textarea></div>
-      <div><label class="field-label">Registado por</label><div class="user-info-row"><span class="user-info-name" id="userName">A carregar…</span></div></div>
-    </div>
-    <div class="divider"></div>
-    <div class="section-label">Anexos</div>
-    <label class="btn-attach" onclick="void(0)">
-      📎 Adicionar ficheiros
-      <input type="file" id="fFicheiros" multiple onchange="onPendingFilesChange(this)">
-    </label>
-    <div id="pendingFilesList" style="margin-top:6px;"></div>
-    <div class="upload-status" id="formUploadStatus"></div>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
-      <button class="btn btn-secondary" onclick="limparForm()">Limpar</button>
-      <button class="btn btn-primary" id="btnRegistarReclamacao" onclick="submitReclamacao()">+ Registar Reclamação</button>
-    </div>
+
+      <div class="divider"></div>
+      <div class="section-label">Períodos reclamados<span class="req">*</span></div>
+      <div class="periodos-wrap" id="periodosWrap"></div>
+      <button class="btn-add-periodo" onclick="adicionarPeriodo()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
+        Adicionar período
+      </button>
+
+      <div class="divider"></div>
+      <div class="section-label">Entrada da reclamação</div>
+      <div class="form-grid">
+        <div class="full">
+          <label class="field-label">Canal de entrada<span class="req">*</span></label>
+          <div class="canal-row">
+            <button class="canal-pill sel" data-c="email" onclick="selCanal('email')">📧 Email</button>
+            <button class="canal-pill" data-c="telefone" onclick="selCanal('telefone')">📞 Telefone</button>
+            <button class="canal-pill" data-c="mensagem" onclick="selCanal('mensagem')">💬 Mensagem</button>
+            <button class="canal-pill" data-c="presencial" onclick="selCanal('presencial')">🧑 Presencial</button>
+          </div>
+        </div>
+        <div class="full"><label class="field-label">Notas internas</label><textarea class="form-textarea" id="fNotas" placeholder="ex: Trabalhador diz que fez turno extra na sexta, não registado no ponto…"></textarea></div>
+        <div><label class="field-label">Registado por</label><div class="user-info-row"><span class="user-info-name" id="userName">A carregar…</span></div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Anexos</div>
+      <label class="btn-attach" onclick="void(0)">
+        📎 Adicionar ficheiros
+        <input type="file" id="fFicheiros" multiple onchange="onPendingFilesChange(this)">
+      </label>
+      <div id="pendingFilesList" style="margin-top:6px;"></div>
+      <div class="upload-status" id="formUploadStatus"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button class="btn btn-secondary" onclick="limparForm()">Limpar</button>
+        <button class="btn btn-primary" id="btnRegistarReclamacao" onclick="submitReclamacao()">Registar Reclamação</button>
+      </div>
+    </div><!-- /form-panel-body -->
   </div>
 
   <!-- SEARCH -->

@@ -34,6 +34,135 @@ function renderDashboardModuleNav() {
   `).join('');
 }
 
+function simplifyDashboardChrome() {
+  const subtitleEditBtn = document.getElementById('dashboardEditBtn');
+  const layoutPresets = document.getElementById('layoutPresets');
+  const layoutResetBtn = document.getElementById('layoutResetBtn');
+  const navLinks = document.querySelector('.nav-links');
+  const topbarBtn = document.getElementById('userAdminBtn');
+  const topbar = document.querySelector('.dash-topbar');
+  let modulesWrap = document.getElementById('dashModulesWrap');
+  let modulesBtn = document.getElementById('dashModulesBtn');
+  let backdrop = document.getElementById('sidebarBackdrop');
+
+  if (subtitleEditBtn) subtitleEditBtn.remove();
+  if (layoutPresets) layoutPresets.remove();
+  if (layoutResetBtn) layoutResetBtn.remove();
+
+  if (navLinks) {
+    navLinks.querySelectorAll('.nav-link').forEach(link => link.remove());
+    navLinks.style.justifyContent = 'flex-end';
+  }
+
+  if (topbarBtn) {
+    topbarBtn.style.display = 'inline-flex';
+    topbarBtn.removeAttribute('href');
+    topbarBtn.onclick = function(event) {
+      event.preventDefault();
+      if (typeof window.openDashboardEditor === 'function') window.openDashboardEditor();
+    };
+    topbarBtn.innerHTML = `
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px;">
+        <path d="M11.5 2.5l2 2M3 13l2.7-.5L13 5.2 10.8 3 3.5 10.3 3 13z"></path>
+        <path d="M9.5 4.5l2 2"></path>
+      </svg>
+      Personalizar
+    `;
+  }
+
+  if (topbar && !modulesBtn) {
+    modulesBtn = document.createElement('button');
+    modulesBtn.id = 'dashModulesBtn';
+    modulesBtn.className = 'dash-modules-btn';
+    modulesBtn.type = 'button';
+    modulesBtn.innerHTML = `
+      <svg viewBox="0 0 16 16"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"></path></svg>
+      Módulos
+    `;
+    modulesBtn.onclick = function() {
+      toggleSidebar();
+    };
+    topbar.insertBefore(modulesBtn, topbar.firstChild);
+  }
+
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'sidebarBackdrop';
+    backdrop.className = 'sidebar-backdrop';
+    backdrop.onclick = function() {
+      if (typeof window.closeSidebarMenu === 'function') window.closeSidebarMenu();
+    };
+    document.body.appendChild(backdrop);
+  }
+
+  modulesBtn = document.getElementById('dashModulesBtn');
+  if (topbar && modulesBtn && !modulesWrap) {
+    const mainModules = typeof window.getAppModules === 'function'
+      ? window.getAppModules({ group: 'main', forNav: true, profile: window.userProfile })
+      : [];
+    const adminModules = typeof window.getAppModules === 'function'
+      ? window.getAppModules({ group: 'admin', forNav: true, profile: window.userProfile })
+      : [];
+
+    modulesWrap = document.createElement('div');
+    modulesWrap.id = 'dashModulesWrap';
+    modulesWrap.className = 'dash-modules-wrap';
+    modulesBtn.parentNode.insertBefore(modulesWrap, modulesBtn);
+    modulesWrap.appendChild(modulesBtn);
+    modulesWrap.insertAdjacentHTML('beforeend', `
+      <div class="dash-modules-menu" id="dashModulesMenu">
+        <div class="dash-modules-group">Principal</div>
+        <a class="dash-modules-item active" href="dashboard.html">
+          <span class="dash-modules-icon">
+            <svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1.2"></rect><rect x="9" y="2" width="5" height="5" rx="1.2"></rect><rect x="2" y="9" width="5" height="5" rx="1.2"></rect><rect x="9" y="9" width="5" height="5" rx="1.2"></rect></svg>
+          </span>
+          <span class="dash-modules-copy">
+            <span class="dash-modules-label">Dashboard</span>
+            <span class="dash-modules-sub">Pagina atual</span>
+          </span>
+        </a>
+        ${mainModules.map(module => `
+          <a class="dash-modules-item" href="${module.href}">
+            <span class="dash-modules-icon">
+              <svg viewBox="0 0 16 16">${module.icon || ''}</svg>
+            </span>
+            <span class="dash-modules-copy">
+              <span class="dash-modules-label">${module.label}</span>
+              <span class="dash-modules-sub">Abrir modulo</span>
+            </span>
+          </a>
+        `).join('')}
+        ${adminModules.length ? `
+          <div class="dash-modules-group">Gestao</div>
+          ${adminModules.map(module => `
+            <a class="dash-modules-item" href="${module.href}">
+              <span class="dash-modules-icon">
+                <svg viewBox="0 0 16 16">${module.icon || ''}</svg>
+              </span>
+              <span class="dash-modules-copy">
+                <span class="dash-modules-label">${module.label}</span>
+                <span class="dash-modules-sub">Abrir modulo</span>
+              </span>
+            </a>
+          `).join('')}
+        ` : ''}
+      </div>
+    `);
+  }
+
+  if (modulesBtn) {
+    modulesBtn.onclick = function(event) {
+      if (typeof window.toggleMobileModulesMenu === 'function') {
+        window.toggleMobileModulesMenu(event);
+      }
+    };
+  }
+
+  if (backdrop && window.innerWidth <= 600) {
+    backdrop.remove();
+  }
+}
+
 // ── Dark mode ──
 function toggleDarkMode() {
   const isDark = document.documentElement.classList.toggle('dark');
@@ -170,17 +299,41 @@ let admissoes   = [];
 let reclamacoes = [];
 let calData     = null;
 let loadedFlags = { tasks: false, com: false, cal: false, adm: false, rec: false };
-let unsubFns    = []; // para cancelar listeners ao mudar filtro
+let unsubFns    = []; // mantido por compatibilidade (agora vazio — sem listeners ativos)
 let _switchEscTimer = null;
-let errorFlags  = {}; // regista listeners que falharam
+let errorFlags  = {}; // regista pedidos que falharam
+
+// ── CACHE DO DASHBOARD ───────────────────────────────────────────────────────
+// Evita re-reads ao Firestore em cada troca de escritório ou navegação rápida.
+// TTL de 2 minutos: dados suficientemente frescos para um painel de gestão.
+const _dashCache = {
+  tasksTs: 0, comTs: 0, admTs: 0, recTs: 0,
+  // calendário por escritório: { [officeId]: timestamp }
+  calTs: {},
+};
+const DASH_CACHE_TTL = 2 * 60 * 1000; // 2 minutos em ms
+
+function _dashCacheValid(key) {
+  return (Date.now() - (_dashCache[key] || 0)) < DASH_CACHE_TTL;
+}
+
+// Expõe um refresh manual (ex: botão "Atualizar")
+function dashRefresh() {
+  _dashCache.tasksTs = 0;
+  _dashCache.comTs   = 0;
+  _dashCache.admTs   = 0;
+  _dashCache.recTs   = 0;
+  _dashCache.calTs   = {};
+  startSync(escritorioAtivoDash);
+}
 
 // ── AGUARDAR AUTH ──
 document.addEventListener('authReady', ({ detail }) => {
   const profile = detail.profile;
 
-  // mini-header não é injetado no dashboard — renderNavbar('dashboard') é no-op
+  // Injeta a sidebar app-shell (sem topbar — dashboard tem a sua própria)
   window.renderNavbar('dashboard');
-  renderDashboardModuleNav();
+  simplifyDashboardChrome();
 
   // user info + logout no canto superior direito
   const isAdmin = window.isAdmin();
@@ -304,110 +457,128 @@ function updateSubtitle(escritorio) {
 // ── ESCRITÓRIO ATIVO (atualizado sem reload) ──
 let escritorioAtivoDash = '';
 
-// ── LISTENERS — carregam tudo, filtro feito no cliente ──
-function startSync(escritorio) {
-  // ── Helper: ID do documento de calendário do mês atual ──
-  function dashCalDocId(esc) {
-    const n = new Date();
-    return 'calendario_' + esc + '_' + n.getFullYear() + '_' + String(n.getMonth()+1).padStart(2,'0');
-  }
+// ── Helper: ID do documento de calendário do mês atual ──
+function dashCalDocId(esc) {
+  const n = new Date();
+  return 'calendario_' + esc + '_' + n.getFullYear() + '_' + String(n.getMonth() + 1).padStart(2, '0');
+}
 
+// ── CARREGAMENTO COM CACHE ────────────────────────────────────────────────────
+// Substituímos os 5 onSnapshot por .get() com TTL de 2 minutos.
+// — Sem listeners permanentes → zero reads contínuos em background
+// — Ao mudar de escritório, apenas o calendário é re-buscado (se o cache expirou)
+// — Botão "Atualizar" / dashRefresh() força nova leitura
+function startSync(escritorio) {
   escritorioAtivoDash = escritorio || '';
 
-  // Se já temos listeners ativos, re-renderizar (filtro no cliente)
-  // Mas o calendário é especial — tem um doc por escritório, precisa de re-subscrever
-  if (unsubFns.length > 0) {
-    // Re-subscrever calendário se mudou de escritório
-    const calEscNovo = (escritorioAtivoDash && escritorioAtivoDash !== 'todos') ? escritorioAtivoDash : (window.getEscritoriosSync ? (window.getEscritoriosSync()[0]||{}).id : '') || 'quarteira';
-    if (window._dashCalEsc !== calEscNovo) {
-      // Remover unsub antigo do array antes de cancelar
-      const calIdx = unsubFns.indexOf(window._dashCalUnsub);
-      if (calIdx > -1) unsubFns.splice(calIdx, 1);
-      if (window._dashCalUnsub) window._dashCalUnsub();
-      window._dashCalEsc = calEscNovo;
-      const newDocId = dashCalDocId(calEscNovo);
-      window._dashCalUnsub = db.collection('calendarios').doc(newDocId).onSnapshot(snap => {
-        calData = snap.exists ? snap.data() : null;
-        renderCalMini();
-        renderEvents();
-      }, err => { console.error('cal:', err); });
-      unsubFns.push(window._dashCalUnsub);
-    }
+  // Resolução do escritório para o calendário
+  const calEsc = (escritorioAtivoDash && escritorioAtivoDash !== 'todos')
+    ? escritorioAtivoDash
+    : (window.getEscritoriosSync ? (window.getEscritoriosSync()[0] || {}).id : '') || 'quarteira';
+
+  // Se todos os dados estão frescos no cache → apenas re-renderizar
+  const allFresh =
+    _dashCacheValid('tasksTs') &&
+    _dashCacheValid('comTs') &&
+    _dashCacheValid('admTs') &&
+    _dashCacheValid('recTs') &&
+    _dashCacheValid('calTs_' + calEsc);
+
+  if (allFresh && (tasks.length + comunicados.length + admissoes.length + reclamacoes.length) > 0) {
     renderAll();
     return;
   }
 
-  // Primeira vez: criar listeners sem .where no servidor (evita índices compostos)
+  // Inicializar flags (apenas para os que precisam de ser buscados)
   loadedFlags = { tasks: false, com: false, cal: false, adm: false, rec: false };
   errorFlags  = {};
-  setStatus('A ligar…', '#f59e0b');
+  setStatus('A carregar…', '#f59e0b');
 
   // ── Tarefas ──
-  const unsubTarefas = db.collection('tarefas_todo')
-    .orderBy('ordemChegada', 'asc')
-    .limit(50)
-    .onSnapshot(snap => {
-      tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      loadedFlags.tasks = true;
-      checkAllLoaded();
-    }, err => {
-      console.error('tasks:', err);
-      // Fallback sem orderBy (evita bloqueio se o índice falhar)
-      db.collection('tarefas_todo').get().then(snap => {
+  if (_dashCacheValid('tasksTs') && tasks.length > 0) {
+    loadedFlags.tasks = true;
+  } else {
+    db.collection('tarefas_todo').orderBy('ordemChegada', 'asc').limit(50).get()
+      .then(snap => {
         tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        _dashCache.tasksTs = Date.now();
         loadedFlags.tasks = true;
         checkAllLoaded();
-      }).catch(() => { loadedFlags.tasks = true; checkAllLoaded(); });
-    });
-  unsubFns.push(unsubTarefas);
+      })
+      .catch(err => {
+        console.error('tasks (orderBy):', err);
+        // Fallback sem orderBy se o índice ainda não existir
+        db.collection('tarefas_todo').limit(50).get()
+          .then(snap => {
+            tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            _dashCache.tasksTs = Date.now();
+          })
+          .catch(() => {})
+          .finally(() => { loadedFlags.tasks = true; checkAllLoaded(); });
+      });
+  }
 
   // ── Comunicados ──
-  const unsubCom = db.collection('comunicados')
-    .orderBy('criadoEm', 'desc')
-    .limit(20)
-    .onSnapshot(snap => {
-      comunicados = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      loadedFlags.com = true;
-      checkAllLoaded();
-    }, err => { console.error('com:', err); errorFlags.com = true; loadedFlags.com = true; checkAllLoaded(); });
-  unsubFns.push(unsubCom);
+  if (_dashCacheValid('comTs') && comunicados.length > 0) {
+    loadedFlags.com = true;
+  } else {
+    db.collection('comunicados').orderBy('criadoEm', 'desc').limit(20).get()
+      .then(snap => {
+        comunicados = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        _dashCache.comTs = Date.now();
+        loadedFlags.com = true;
+        checkAllLoaded();
+      })
+      .catch(err => { console.error('com:', err); errorFlags.com = true; loadedFlags.com = true; checkAllLoaded(); });
+  }
 
   // ── Admissões ──
-  const unsubAdm = db.collection('admissoes')
-    .orderBy('criadoEm', 'desc')
-    .limit(20)
-    .onSnapshot(snap => {
-      admissoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      loadedFlags.adm = true;
-      checkAllLoaded();
-    }, err => { console.error('adm:', err); errorFlags.adm = true; loadedFlags.adm = true; checkAllLoaded(); });
-  unsubFns.push(unsubAdm);
-
-  // ── Calendário — carrega o doc do escritório ativo ──
-  // Re-subscreve quando o escritório muda
-  const calEsc = (escritorioAtivoDash && escritorioAtivoDash !== 'todos')
-    ? escritorioAtivoDash : (window.getEscritoriosSync ? (window.getEscritoriosSync()[0]||{}).id : '') || 'quarteira';
-  const calDocId = dashCalDocId(calEsc);
-
-  window._dashCalEsc = calEsc;
-  window._dashCalUnsub = db.collection('calendarios').doc(calDocId).onSnapshot(snap => {
-    calData = snap.exists ? snap.data() : null;
-    loadedFlags.cal = true;
-    checkAllLoaded();
-  }, err => { console.error('cal:', err); errorFlags.cal = true; loadedFlags.cal = true; checkAllLoaded(); });
-  unsubFns.push(window._dashCalUnsub);
+  if (_dashCacheValid('admTs') && admissoes.length > 0) {
+    loadedFlags.adm = true;
+  } else {
+    db.collection('admissoes').orderBy('criadoEm', 'desc').limit(20).get()
+      .then(snap => {
+        admissoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        _dashCache.admTs = Date.now();
+        loadedFlags.adm = true;
+        checkAllLoaded();
+      })
+      .catch(err => { console.error('adm:', err); errorFlags.adm = true; loadedFlags.adm = true; checkAllLoaded(); });
+  }
 
   // ── Reclamações ──
-  const unsubRec = db.collection('reclamacoes_horas')
-    .orderBy('criadoEm', 'desc')
-    .limit(20)
-    .onSnapshot(snap => {
-      reclamacoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      loadedFlags.rec = true;
-      checkAllLoaded();
-      renderReclamacoes(); // atualizar painel mesmo após carregamento inicial
-    }, err => { console.error('rec:', err); errorFlags.rec = true; loadedFlags.rec = true; checkAllLoaded(); });
-  unsubFns.push(unsubRec);
+  if (_dashCacheValid('recTs') && reclamacoes.length > 0) {
+    loadedFlags.rec = true;
+  } else {
+    db.collection('reclamacoes_horas').orderBy('criadoEm', 'desc').limit(20).get()
+      .then(snap => {
+        reclamacoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        _dashCache.recTs = Date.now();
+        loadedFlags.rec = true;
+        checkAllLoaded();
+        renderReclamacoes();
+      })
+      .catch(err => { console.error('rec:', err); errorFlags.rec = true; loadedFlags.rec = true; checkAllLoaded(); });
+  }
+
+  // ── Calendário (por escritório) ──
+  const calDocId = dashCalDocId(calEsc);
+  if (_dashCacheValid('calTs_' + calEsc) && calData !== undefined) {
+    loadedFlags.cal = true;
+  } else {
+    db.collection('calendarios').doc(calDocId).get()
+      .then(snap => {
+        calData = snap.exists ? snap.data() : null;
+        _dashCache.calTs['calTs_' + calEsc] = Date.now();
+        _dashCache['calTs_' + calEsc] = Date.now();
+        loadedFlags.cal = true;
+        checkAllLoaded();
+      })
+      .catch(err => { console.error('cal:', err); errorFlags.cal = true; loadedFlags.cal = true; checkAllLoaded(); });
+  }
+
+  // Se todos estavam em cache, renderizar agora
+  checkAllLoaded();
 }
 
 // ── CHECK LOADED ──
@@ -421,8 +592,12 @@ function checkAllLoaded() {
     setTimeout(() => setStatus(''), 3000);
   }
   const now = new Date();
-  document.getElementById('lastUpdate').textContent =
-    'Actualizado às ' + now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+  const lastUpdateEl = document.getElementById('lastUpdate');
+  if (lastUpdateEl) {
+    lastUpdateEl.innerHTML =
+      'Actualizado às ' + now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) +
+      ' &nbsp;<button onclick="dashRefresh()" title="Forçar atualização" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--muted);padding:0 2px;vertical-align:middle;" onmouseover="this.style.color=\'var(--accent)\'" onmouseout="this.style.color=\'var(--muted)\'">↺</button>';
+  }
 }
 
 

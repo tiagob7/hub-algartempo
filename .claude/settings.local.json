@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr:*)",
+      "Bash(where gh:*)",
+      "Bash(winget list:*)",
+      "Bash(grep -n viewport /mnt/c/Users/Tiago/Desktop/Calendario-main/.claude/worktrees/jovial-beaver/*.html)",
+      "Bash(grep -n \"addEventListener\\\\|onclick\\\\|onerror\\\\|onload\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
+      "Bash(grep -n \"\\\\.innerHTML.*\\\\+\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
+      "Bash(grep -n '\\\\${[^}]*\\\\.nome\\\\|\\\\${[^}]*\\\\.titulo\\\\|\\\\${[^}]*\\\\.email\\\\|\\\\${[^}]*\\\\.data' /c/Users/Tiago/Documents/GitHub/Calendario/admissoes.html)",
+      "Bash(grep -n \"apiKey\\\\|password\\\\|token\\\\|secret\\\\|key\" /c/Users/Tiago/Documents/GitHub/Calendario/*.js)",
+      "Bash(grep -n \"onSnapshot\\\\|\\\\.listen\\\\|unsub\\\\|unsubscribe\\\\|\\\\.off\\(\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
+      "Bash(grep -n \"catch\\\\|\\\\.catch\\(\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
+      "Bash(grep -n \"window.addEventListener.*beforeunload\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
+      "Bash(grep -n \"query.onSnapshot\\\\|col.onSnapshot\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
+      "Bash(grep -n \"orderBy.*limit\\\\|\\\\.where.*limit\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
+      "Bash(python3:*)",
+      "Bash(del \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\firebase-init.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\auth.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\utils.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\auditoria.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\config-escritorios.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\voz-ai.js\")"
+    ]
+  }
+}

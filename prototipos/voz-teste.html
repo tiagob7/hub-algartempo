@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voz → AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@700;800&display=swap');
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #1a1a24;
+  --border: #2a2a3a;
+  --text: #e8e8f0;
+  --muted: #5a5a7a;
+  --accent: #6c63ff;
+  --accent2: #a78bfa;
+  --green: #34d399;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --glow: rgba(108,99,255,.35);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 60px;
+  overflow-x: hidden;
+}
+
+/* ── FUNDO ANIMADO ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(108,99,255,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(167,139,250,.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; width: 100%; max-width: 680px; }
+
+/* ── HEADER ── */
+.header { text-align: center; margin-bottom: 48px; }
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .15em;
+  color: var(--accent2); border: 1px solid rgba(167,139,250,.25);
+  padding: 4px 12px; border-radius: 20px;
+  background: rgba(108,99,255,.08);
+  margin-bottom: 16px;
+}
+.header-badge span { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 44px);
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #e8e8f0 0%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.header-sub { font-size: 12px; color: var(--muted); letter-spacing: .05em; }
+
+/* ── TIPO DE REGISTO ── */
+.tipo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.tipo-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 8px;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  transition: all .2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.tipo-btn svg { width: 20px; height: 20px; opacity: .5; transition: opacity .2s; }
+.tipo-btn:hover { border-color: var(--accent); color: var(--accent2); }
+.tipo-btn:hover svg { opacity: .8; }
+.tipo-btn.active {
+  border-color: var(--accent);
+  background: rgba(108,99,255,.12);
+  color: var(--accent2);
+  box-shadow: 0 0 20px rgba(108,99,255,.15);
+}
+.tipo-btn.active svg { opacity: 1; }
+
+/* ── MIC AREA ── */
+.mic-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .3s;
+}
+.mic-section.recording {
+  border-color: var(--red);
+  box-shadow: 0 0 40px rgba(248,113,113,.1);
+}
+.mic-section.recording::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(248,113,113,.04) 0%, transparent 70%);
+  animation: breathe 1.5s ease-in-out infinite;
+}
+
+/* ── BOTÃO MIC ── */
+.mic-btn {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  position: relative;
+  transition: all .2s;
+  outline: none;
+}
+.mic-btn::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent), var(--accent2), var(--accent));
+  opacity: 0;
+  transition: opacity .3s;
+  animation: spin 2s linear infinite;
+}
+.mic-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--surface2);
+  z-index: 1;
+}
+.mic-btn svg { position: relative; z-index: 2; width: 30px; height: 30px; color: var(--muted); transition: color .2s; }
+.mic-btn:hover { transform: scale(1.06); }
+.mic-btn:hover svg { color: var(--text); }
+.mic-btn.active::before { opacity: 1; }
+.mic-btn.active svg { color: var(--red); }
+.mic-btn.active { box-shadow: 0 0 30px rgba(248,113,113,.3); }
+
+/* ── ONDAS SONORAS ── */
+.waves {
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  height: 32px; margin-bottom: 16px;
+}
+.wave-bar {
+  width: 3px; background: var(--accent); border-radius: 2px;
+  height: 4px; transition: height .1s;
+  opacity: .4;
+}
+.recording .wave-bar { opacity: 1; }
+.recording .wave-bar:nth-child(1) { animation: wave 1.1s ease-in-out infinite; }
+.recording .wave-bar:nth-child(2) { animation: wave 1.1s ease-in-out infinite .1s; }
+.recording .wave-bar:nth-child(3) { animation: wave 1.1s ease-in-out infinite .2s; }
+.recording .wave-bar:nth-child(4) { animation: wave 1.1s ease-in-out infinite .05s; }
+.recording .wave-bar:nth-child(5) { animation: wave 1.1s ease-in-out infinite .15s; }
+.recording .wave-bar:nth-child(6) { animation: wave 1.1s ease-in-out infinite .25s; }
+.recording .wave-bar:nth-child(7) { animation: wave 1.1s ease-in-out infinite .08s; }
+.recording .wave-bar:nth-child(8) { animation: wave 1.1s ease-in-out infinite .18s; }
+.recording .wave-bar:nth-child(9) { animation: wave 1.1s ease-in-out infinite .12s; }
+
+.mic-status { font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.mic-status.recording { color: var(--red); }
+
+/* ── TRANSCRIÇÃO ── */
+.transcript-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 52px;
+  color: var(--text);
+  margin-top: 20px;
+  text-align: left;
+  position: relative;
+  display: none;
+}
+.transcript-box.visible { display: block; }
+.transcript-label {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--muted); margin-bottom: 6px; display: block;
+}
+.transcript-interim { color: var(--muted); font-style: italic; }
+
+/* ── CARD RESULTADO ── */
+.result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  display: none;
+  animation: slideUp .3s ease;
+}
+.result-card.visible { display: block; }
+.result-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.result-header-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(108,99,255,.15);
+}
+.result-header-icon svg { width: 14px; height: 14px; color: var(--accent2); }
+.result-header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .04em; flex: 1;
+}
+.result-header-badge {
+  font-size: 9px; padding: 3px 8px; border-radius: 6px;
+  background: rgba(52,211,153,.1); color: var(--green);
+  border: 1px solid rgba(52,211,153,.2);
+  text-transform: uppercase; letter-spacing: .08em;
+}
+
+.result-body { padding: 20px; }
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:480px) { .fields-grid { grid-template-columns: 1fr; } }
+
+.field-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: border-color .2s;
+}
+.field-item:hover { border-color: rgba(108,99,255,.4); }
+.field-item.full { grid-column: 1 / -1; }
+.field-key {
+  font-size: 9px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--muted); margin-bottom: 5px;
+}
+.field-val {
+  font-size: 12px; color: var(--text); line-height: 1.5;
+  word-break: break-word;
+}
+.field-val.empty { color: var(--muted); font-style: italic; }
+.field-val .prio-alta  { color: var(--red); }
+.field-val .prio-media { color: var(--yellow); }
+.field-val .prio-baixa { color: var(--green); }
+
+/* ── LOADING ── */
+.loading-dots { display: inline-flex; gap: 4px; }
+.loading-dots span {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+  animation: dot 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: .2s; }
+.loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+/* ── AÇÕES ── */
+.actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 14px 20px; border-top: 1px solid var(--border);
+}
+.action-btn {
+  flex: 1; padding: 10px 14px; border: none; border-radius: 10px;
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: .08em; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 100px;
+}
+.action-btn svg { width: 12px; height: 12px; }
+.action-btn.confirm { background: var(--accent); color: #fff; box-shadow: 0 4px 16px var(--glow); }
+.action-btn.confirm:hover { background: var(--accent2); transform: translateY(-1px); }
+.action-btn.retry { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.action-btn.retry:hover { color: var(--text); border-color: var(--muted); }
+.action-btn.discard { background: rgba(248,113,113,.08); color: var(--red); border: 1px solid rgba(248,113,113,.2); }
+.action-btn.discard:hover { background: rgba(248,113,113,.15); }
+
+/* ── LOG ── */
+.log-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: none;
+}
+.log-wrap.visible { display: block; }
+.log-title { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; }
+.log-entries { font-size: 10px; line-height: 2; max-height: 120px; overflow-y: auto; }
+.log-entries .ok   { color: var(--green); }
+.log-entries .err  { color: var(--red); }
+.log-entries .info { color: var(--accent2); }
+
+/* ── NOTA BROWSER ── */
+.browser-note {
+  background: rgba(251,191,36,.06);
+  border: 1px solid rgba(251,191,36,.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 10px;
+  color: var(--yellow);
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 20px;
+}
+.browser-note svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ── KEYFRAMES ── */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes breathe { 0%,100%{opacity:.6} 50%{opacity:1} }
+@keyframes wave { 0%,100%{height:4px} 50%{height:22px} }
+@keyframes dot { 0%,80%,100%{transform:scale(0);opacity:.3} 40%{transform:scale(1);opacity:1} }
+@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-badge"><span></span> Protótipo</div>
+    <h1>Voz para Registo</h1>
+    <p class="header-sub">Diz o que queres criar — a AI preenche os campos</p>
+  </div>
+
+  <div class="browser-note">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M8 1l7 14H1L8 1z"/><path d="M8 6v4"/><circle cx="8" cy="12" r=".5" fill="currentColor"/>
+    </svg>
+    Requer Chrome ou Edge — a Web Speech API não está disponível em Firefox/Safari.
+  </div>
+
+  <!-- TIPO -->
+  <div class="tipo-grid">
+    <button class="tipo-btn active" data-tipo="tarefa" onclick="setTipo('tarefa',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="2" y="2" width="12" height="12" rx="2"/>
+        <path d="M5 8l2 2 4-4"/>
+      </svg>
+      Tarefa
+    </button>
+    <button class="tipo-btn" data-tipo="admissao" onclick="setTipo('admissao',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="8" cy="5" r="3"/>
+        <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5"/>
+        <path d="M11 8l2 2-2 2"/>
+      </svg>
+      Admissão
+    </button>
+    <button class="tipo-btn" data-tipo="comunicado" onclick="setTipo('comunicado',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z"/>
+        <path d="M2 4l6 5 6-5"/>
+      </svg>
+      Comunicado
+    </button>
+  </div>
+
+  <!-- MIC -->
+  <div class="mic-section" id="micSection">
+    <button class="mic-btn" id="micBtn" onclick="toggleGravacao()">
+      <svg id="micIcon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="5" y="1" width="6" height="9" rx="3"/>
+        <path d="M2 8c0 3.3 2.7 6 6 6s6-2.7 6-6"/>
+        <path d="M8 14v2"/>
+      </svg>
+    </button>
+
+    <div class="waves">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+
+    <div class="mic-status" id="micStatus">Clica para falar</div>
+
+    <div class="transcript-box" id="transcriptBox">
+      <span class="transcript-label">A transcrever</span>
+      <span id="transcriptFinal"></span>
+      <span class="transcript-interim" id="transcriptInterim"></span>
+    </div>
+  </div>
+
+  <!-- RESULTADO AI -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-header-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M8 1l1.5 3.5 3.5.5-2.5 2.5.5 3.5L8 9.5 5 11l.5-3.5L3 5l3.5-.5L8 1z"/>
+        </svg>
+      </div>
+      <span class="result-header-title" id="resultTitle">A processar…</span>
+      <span class="result-header-badge" id="resultBadge" style="display:none;">Pronto</span>
+    </div>
+    <div class="result-body" id="resultBody">
+      <div style="text-align:center;padding:20px 0;">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;">A Claude está a interpretar…</p>
+      </div>
+    </div>
+    <div class="actions" id="resultActions" style="display:none;">
+      <button class="action-btn confirm" onclick="confirmarRegisto()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 4"/></svg>
+        Confirmar registo
+      </button>
+      <button class="action-btn retry" onclick="reprocessar()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8A6 6 0 1114 8"/><path d="M2 8V4H6"/></svg>
+        Reprocessar
+      </button>
+      <button class="action-btn discard" onclick="descartar()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+        Descartar
+      </button>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="log-wrap" id="logWrap">
+    <div class="log-title">Log</div>
+    <div class="log-entries" id="logEntries"></div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──
+// Coloca aqui a tua Claude API key para testar
+// Em produção isto deve ser feito pelo backend!
+const CLAUDE_API_KEY = ''; // <-- preenche para testar
+
+const PROMPTS = {
+  tarefa: `Analisa este texto em português e extrai os dados para uma tarefa de trabalho.
+Responde APENAS com JSON válido, sem mais nada.
+Formato:
+{
+  "titulo": "título curto e claro da tarefa",
+  "descricao": "descrição mais detalhada ou vazia se não houver",
+  "prioridade": "Alta | Média | Baixa",
+  "responsavel": "nome da pessoa responsável ou vazio",
+  "escritorio": "nome do escritório ou vazio",
+  "prazo": "data ou prazo em texto natural ou vazio",
+  "departamento": "Contabilidade | Payroll | RH | Geral ou vazio"
+}`,
+
+  admissao: `Analisa este texto em português e extrai os dados para uma admissão de colaborador.
+Responde APENAS com JSON válido, sem mais nada.
+Formato:
+{
+  "nome": "nome completo do colaborador",
+  "cargo": "cargo ou função",
+  "departamento": "Contabilidade | Payroll | RH | Outro",
+  "escritorio": "nome do escritório",
+  "dataInicio": "data de início em texto",
+  "nif": "NIF se mencionado ou vazio",
+  "observacoes": "outras observações relevantes ou vazio"
+}`,
+
+  comunicado: `Analisa este texto em português e extrai os dados para um comunicado interno.
+Responde APENAS com JSON válido, sem mais nada.
+Formato:
+{
+  "assunto": "assunto/título do comunicado",
+  "mensagem": "corpo do comunicado",
+  "destinatarios": "Todos | nome do escritório | nome do departamento",
+  "urgente": true ou false,
+  "data": "data relevante mencionada ou vazio"
+}`
+};
+
+const FIELD_LABELS = {
+  tarefa:     { titulo:'Título', descricao:'Descrição', prioridade:'Prioridade', responsavel:'Responsável', escritorio:'Escritório', prazo:'Prazo', departamento:'Departamento' },
+  admissao:   { nome:'Nome', cargo:'Cargo', departamento:'Departamento', escritorio:'Escritório', dataInicio:'Data de início', nif:'NIF', observacoes:'Observações' },
+  comunicado: { assunto:'Assunto', mensagem:'Mensagem', destinatarios:'Destinatários', urgente:'Urgente', data:'Data' },
+};
+
+const FULL_FIELDS = {
+  tarefa:     ['descricao'],
+  admissao:   ['observacoes'],
+  comunicado: ['mensagem'],
+};
+
+// ── ESTADO ──
+let tipoAtivo = 'tarefa';
+let recognition = null;
+let gravando = false;
+let transcricaoFinal = '';
+let dadosExtraidos = null;
+
+// ── TIPO ──
+function setTipo(tipo, el) {
+  tipoAtivo = tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  descartar();
+}
+
+// ── GRAVAÇÃO ──
+function toggleGravacao() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('O teu browser não suporta a Web Speech API.\nUsa Chrome ou Edge.');
+    return;
+  }
+  if (gravando) pararGravacao();
+  else iniciarGravacao();
+}
+
+function iniciarGravacao() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRec();
+  recognition.lang = 'pt-PT';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  transcricaoFinal = '';
+  document.getElementById('transcriptFinal').textContent = '';
+  document.getElementById('transcriptInterim').textContent = '';
+  document.getElementById('transcriptBox').classList.add('visible');
+
+  recognition.onstart = () => {
+    gravando = true;
+    setMicState(true);
+    log('Microfone ativo — a ouvir…', 'info');
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) transcricaoFinal += t + ' ';
+      else interim = t;
+    }
+    document.getElementById('transcriptFinal').textContent = transcricaoFinal;
+    document.getElementById('transcriptInterim').textContent = interim;
+  };
+
+  recognition.onerror = (e) => {
+    log('Erro de reconhecimento: ' + e.error, 'err');
+    pararGravacao();
+  };
+
+  recognition.onend = () => {
+    if (gravando) {
+      // Reiniciar se parou sozinho (timeout do browser)
+      recognition.start();
+    }
+  };
+
+  recognition.start();
+}
+
+function pararGravacao() {
+  gravando = false;
+  if (recognition) { recognition.onend = null; recognition.stop(); }
+  setMicState(false);
+  const texto = transcricaoFinal.trim();
+  if (texto) {
+    log('Transcrição concluída: "' + texto.slice(0,60) + (texto.length>60?'…':'') + '"', 'ok');
+    processarComClaude(texto);
+  } else {
+    log('Nada foi detetado. Tenta novamente.', 'err');
+  }
+}
+
+function setMicState(ativo) {
+  const btn = document.getElementById('micBtn');
+  const status = document.getElementById('micStatus');
+  const section = document.getElementById('micSection');
+
+  btn.classList.toggle('active', ativo);
+  status.classList.toggle('recording', ativo);
+  section.classList.toggle('recording', ativo);
+
+  if (ativo) {
+    status.textContent = 'A ouvir… (clica para parar)';
+    btn.querySelector('svg').innerHTML = `<rect x="4" y="4" width="8" height="8" rx="1" fill="currentColor" stroke="none"/>`;
+  } else {
+    status.textContent = 'Clica para falar';
+    btn.querySelector('svg').innerHTML = `<rect x="5" y="1" width="6" height="9" rx="3"/><path d="M2 8c0 3.3 2.7 6 6 6s6-2.7 6-6"/><path d="M8 14v2"/>`;
+  }
+}
+
+// ── CLAUDE API ──
+async function processarComClaude(texto) {
+  const card = document.getElementById('resultCard');
+  const body = document.getElementById('resultBody');
+  const title = document.getElementById('resultTitle');
+  const actions = document.getElementById('resultActions');
+  const badge = document.getElementById('resultBadge');
+
+  card.classList.add('visible');
+  actions.style.display = 'none';
+  badge.style.display = 'none';
+  title.textContent = 'Claude está a interpretar…';
+  body.innerHTML = `<div style="text-align:center;padding:24px 0;">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;letter-spacing:.05em;">A extrair campos do texto…</p>
+  </div>`;
+
+  card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  // Se não há API key, fazer simulação
+  if (!CLAUDE_API_KEY) {
+    log('Sem API key — a usar simulação de demonstração', 'info');
+    await new Promise(r => setTimeout(r, 1800));
+    dadosExtraidos = simularResposta(texto, tipoAtivo);
+    renderResultado(dadosExtraidos);
+    return;
+  }
+
+  try {
+    log('A enviar para Claude API…', 'info');
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: PROMPTS[tipoAtivo] + '\n\nTexto: "' + texto + '"'
+        }]
+      })
+    });
+
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    const data = await resp.json();
+    const raw = data.content?.[0]?.text || '';
+    log('Resposta recebida — a parsear JSON…', 'ok');
+
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    dadosExtraidos = JSON.parse(cleaned);
+    renderResultado(dadosExtraidos);
+
+  } catch(e) {
+    log('Erro: ' + e.message, 'err');
+    body.innerHTML = `<div style="text-align:center;padding:20px 0;">
+      <p style="font-size:12px;color:var(--red);">Erro ao processar: ${e.message}</p>
+      <p style="font-size:10px;color:var(--muted);margin-top:8px;">Verifica se a API key está correta ou usa o modo de demonstração (sem key).</p>
+    </div>`;
+    actions.style.display = 'flex';
+  }
+}
+
+function renderResultado(dados) {
+  const labels = FIELD_LABELS[tipoAtivo];
+  const fullFields = FULL_FIELDS[tipoAtivo] || [];
+  const title = document.getElementById('resultTitle');
+  const badge = document.getElementById('resultBadge');
+  const body = document.getElementById('resultBody');
+  const actions = document.getElementById('resultActions');
+
+  const tipos = { tarefa:'Tarefa', admissao:'Admissão', comunicado:'Comunicado' };
+  title.textContent = tipos[tipoAtivo] + ' extraída';
+  badge.style.display = 'inline-block';
+
+  const campos = Object.entries(dados).map(([k, v]) => {
+    if (!(k in labels)) return '';
+    const isFull = fullFields.includes(k);
+    const isEmpty = !v || v === '' || v === 'vazio';
+    let valHtml = '';
+
+    if (k === 'prioridade' && v) {
+      const cl = v.toLowerCase() === 'alta' ? 'prio-alta' : v.toLowerCase() === 'média' ? 'prio-media' : 'prio-baixa';
+      valHtml = `<span class="${cl}">▲ ${v}</span>`;
+    } else if (k === 'urgente') {
+      valHtml = v ? '<span style="color:var(--red);">⚠ Sim</span>' : '<span style="color:var(--green);">Não</span>';
+    } else {
+      valHtml = isEmpty ? '<span class="empty">—</span>' : String(v);
+    }
+
+    return `<div class="field-item${isFull?' full':''}">
+      <div class="field-key">${labels[k]}</div>
+      <div class="field-val">${valHtml}</div>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = `<div class="fields-grid">${campos}</div>`;
+  actions.style.display = 'flex';
+  log('Campos extraídos com sucesso.', 'ok');
+}
+
+// ── SIMULAÇÃO (sem API key) ──
+function simularResposta(texto, tipo) {
+  const t = texto.toLowerCase();
+  if (tipo === 'tarefa') return {
+    titulo: extrairTitulo(texto) || 'Tarefa de ' + new Date().toLocaleDateString('pt'),
+    descricao: texto.length > 40 ? texto : '',
+    prioridade: t.includes('urgent') || t.includes('urgente') ? 'Alta' : t.includes('baixa') ? 'Baixa' : 'Média',
+    responsavel: extrairNome(texto) || '',
+    escritorio: extrairEscritorio(texto) || '',
+    prazo: extrairData(texto) || '',
+    departamento: t.includes('contabil') ? 'Contabilidade' : t.includes('payroll') || t.includes('rh') ? 'Payroll' : 'Geral',
+  };
+  if (tipo === 'admissao') return {
+    nome: extrairNome(texto) || 'Nome não detetado',
+    cargo: t.includes('contabil') ? 'Contabilista' : t.includes('payroll') ? 'Técnico de Payroll' : 'Colaborador',
+    departamento: t.includes('contabil') ? 'Contabilidade' : t.includes('payroll') || t.includes('rh') ? 'Payroll' : 'Outro',
+    escritorio: extrairEscritorio(texto) || '',
+    dataInicio: extrairData(texto) || '',
+    nif: '',
+    observacoes: '',
+  };
+  return {
+    assunto: extrairTitulo(texto) || 'Comunicado interno',
+    mensagem: texto,
+    destinatarios: t.includes('todos') ? 'Todos' : extrairEscritorio(texto) || 'Todos',
+    urgente: t.includes('urgent') || t.includes('urgente'),
+    data: extrairData(texto) || '',
+  };
+}
+
+function extrairNome(t) {
+  const m = t.match(/\b([A-ZÁÉÍÓÚÀÂÊÔÃÕÇ][a-záéíóúàâêôãõç]+ [A-ZÁÉÍÓÚÀÂÊÔÃÕÇ][a-záéíóúàâêôãõç]+)\b/);
+  return m ? m[1] : null;
+}
+function extrairEscritorio(t) {
+  const base = (window.escritoriosValidos ? window.escritoriosValidos() : ['quarteira','albufeira','lisboa','porto']);
+  return base.find(e => t.toLowerCase().includes(e)) || null;
+}
+function extrairData(t) {
+  const m = t.match(/\b(\d{1,2}[\/-]\d{1,2}([\/-]\d{2,4})?|\d{1,2} de \w+(\s+de \d{4})?|amanhã|segunda|terça|quarta|quinta|sexta)\b/i);
+  return m ? m[0] : null;
+}
+function extrairTitulo(t) {
+  const palavras = t.split(' ').slice(0,6).join(' ');
+  return palavras.charAt(0).toUpperCase() + palavras.slice(1);
+}
+
+// ── AÇÕES ──
+function confirmarRegisto() {
+  if (!dadosExtraidos) return;
+  log('✓ Registo confirmado! (em produção guardaria no Firestore)', 'ok');
+  const badge = document.getElementById('resultBadge');
+  badge.textContent = 'Guardado ✓';
+  badge.style.background = 'rgba(52,211,153,.15)';
+  document.getElementById('resultActions').innerHTML = `
+    <button class="action-btn retry" style="flex:none;" onclick="descartar()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:12px;height:12px;"><path d="M2 8A6 6 0 1114 8"/><path d="M2 8V4H6"/></svg>
+      Novo registo
+    </button>`;
+  log('Para integrar com o Firestore, chama a função de guardar aqui.', 'info');
+}
+
+function reprocessar() {
+  if (!transcricaoFinal.trim()) return;
+  processarComClaude(transcricaoFinal.trim());
+}
+
+function descartar() {
+  dadosExtraidos = null;
+  transcricaoFinal = '';
+  document.getElementById('resultCard').classList.remove('visible');
+  document.getElementById('transcriptBox').classList.remove('visible');
+  document.getElementById('transcriptFinal').textContent = '';
+  document.getElementById('transcriptInterim').textContent = '';
+}
+
+// ── LOG ──
+function log(msg, tipo='') {
+  const wrap = document.getElementById('logWrap');
+  const entries = document.getElementById('logEntries');
+  wrap.classList.add('visible');
+  const now = new Date().toLocaleTimeString('pt',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  entries.innerHTML += `<div class="${tipo}"><span style="opacity:.4;">${now}</span> ${msg}</div>`;
+  entries.scrollTop = entries.scrollHeight;
+}
+</script>
+</body>
+</html>

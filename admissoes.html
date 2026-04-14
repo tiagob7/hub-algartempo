@@ -31,15 +31,19 @@
   </div>
 
   <!-- FORM -->
-  <div class="form-panel">
-    <div class="panel-title">
+  <div class="form-panel" id="formAdmissoes">
+    <div class="panel-title panel-toggle" onclick="toggleFormAdm()">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3l2 1.5"/></svg>
       Novo Processo
-      <button class="mic-trigger-btn" onclick="VozAI.abrir('admissao')">
+      <button class="mic-trigger-btn" onclick="event.stopPropagation();VozAI.abrir('admissao')">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M2 8c0 3.3 2.7 6 6 6s6-2.7 6-6"/><path d="M8 14v2"/></svg>
         Voz
       </button>
+      <span class="panel-toggle-chevron">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </span>
     </div>
+    <div class="form-panel-body">
 
     <!-- TIPO SELECTOR -->
     <div class="tipo-selector">
@@ -176,8 +180,9 @@
     <div class="upload-status" id="formAdmUploadStatus"></div>
 
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
-      <button class="btn btn-primary" id="btnSubmeterProcesso" onclick="submitProcesso()">+ Submeter processo</button>
+      <button class="btn btn-primary" id="btnSubmeterProcesso" onclick="submitProcesso()">Submeter processo</button>
     </div>
+    </div><!-- /form-panel-body -->
   </div>
 
   <div class="controls-wrap">
