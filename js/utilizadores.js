@@ -120,7 +120,7 @@ async function applyPerfilUtilizador(uid, perfilId) {
       toast('Perfil "' + perfilId + '" aplicado.');
     } else {
       await window.PerfisService.removePerfilFromUser(uid);
-      toast('Perfil removido. Permissoes repitas para defaults.');
+      toast('Perfil removido. Permissoes repostas para defaults.');
     }
     _utilCache.ts = 0;
     carregarUtilizadores();
@@ -134,10 +134,28 @@ async function setPermissao(uid, perm, val) {
   const item = document.getElementById('permItem_' + uid + '_' + perm);
   if (item) item.classList.toggle('on', val);
 
+  const user = users.find(entry => entry.uid === uid);
+  const hadPerfil = !!(user && user.perfil);
+
   try {
-    await window.UsersService.setPermission(uid, perm, val);
+    await window.UsersService.setPermission(uid, perm, val, { clearProfile: hadPerfil });
+
+    if (user) {
+      user.perfil = null;
+    }
+
+    if (hadPerfil) {
+      _utilCache.ts = 0;
+      carregarUtilizadores();
+      toast('Permissao atualizada e perfil removido para permitir configuracao individual.');
+      return;
+    }
+
     toast('Permissao ' + (val ? 'ativada' : 'removida') + '.');
   } catch (e) {
+    if (item) item.classList.toggle('on', !val);
+    const input = document.getElementById('perm_' + uid + '_' + perm);
+    if (input) input.checked = !val;
     console.error(e);
     toast('Erro ao atualizar permissao.');
   }

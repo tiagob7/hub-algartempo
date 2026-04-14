@@ -68,7 +68,8 @@ service cloud.firestore {
     }
 
     match /utilizadores/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || hasPerm('utilizadores', 'manage'));
+      allow get: if signedIn() && (request.auth.uid == uid || hasPerm('utilizadores', 'manage'));
+      allow list: if isActiveUser() && resource.data.ativo != false;
       allow create: if signedIn() && request.auth.uid == uid;
       allow update: if signedIn() && (
         hasPerm('utilizadores', 'manage')
@@ -86,7 +87,8 @@ service cloud.firestore {
 
     match /config/{docId} {
       allow read: if isActiveUser();
-      allow write: if hasPerm('definicoes', 'manage');
+      allow write: if hasPerm('definicoes', 'manage')
+        || (docId == 'perfis' && hasPerm('perfis', 'manage'));
     }
 
     match /tarefas_todo/{docId} {

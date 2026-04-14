@@ -878,10 +878,15 @@ window.bootProtectedPage({
   activePage: 'escalas',
   moduleId: 'escalas',
 }, ({ profile, isAdmin, escritorio }) => {
-  currentEscritorio = escritorio || 'quarteira';
+  currentEscritorio = escritorio || '';
 
   loadEscritorios().then(lista => {
     const sub = document.getElementById('pageSubtitle');
+    const escritoriosAtivos = (lista || []).filter(e => e && e.ativo !== false);
+
+    if (!currentEscritorio || currentEscritorio === 'todos') {
+      currentEscritorio = (escritoriosAtivos[0] && escritoriosAtivos[0].id) || (lista[0] && lista[0].id) || 'quarteira';
+    }
 
     if (isAdmin && lista.length > 1) {
       const pillsWrap = document.getElementById('escritorioPills');

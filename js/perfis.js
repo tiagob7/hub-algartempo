@@ -319,11 +319,10 @@
   window.bootProtectedPage({
     activePage: 'perfis',
     moduleId: 'perfis',
-    requireAdmin: true,
   }, ({ profile }) => {
     const me = profile ? (profile.nomeCompleto || profile.nome || profile.email || '') : '';
     const meInfo = document.getElementById('meInfo');
-    if (meInfo) meInfo.textContent = 'Sessão iniciada como Admin: ' + me;
+    if (meInfo) meInfo.textContent = 'Sessão iniciada como: ' + me;
 
     // Listeners do modal
     document.getElementById('btnCancelarModal').addEventListener('click', fecharModal);

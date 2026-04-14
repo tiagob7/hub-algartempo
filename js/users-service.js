@@ -85,7 +85,7 @@
     await usersCollection().doc(uid).update(patch);
   }
 
-  async function setPermission(uid, permission, value) {
+  async function setPermission(uid, permission, value, options) {
     if (!permission) throw new Error('Permissao em falta.');
 
     const canonical = typeof window.resolvePermissionKey === 'function'
@@ -98,6 +98,10 @@
     getLegacyKeys(permission).forEach(legacyKey => {
       patch['permissoes.' + legacyKey] = !!value;
     });
+
+    if (options && options.clearProfile) {
+      patch.perfil = null;
+    }
 
     await update(uid, patch);
   }

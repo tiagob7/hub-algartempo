@@ -14,8 +14,10 @@ Sistema interno de gestão multi-escritório para RH e operações, construído 
 | **Admissões** | Processos de admissão e cessação com anexos e modo gestor |
 | **Reclamações** | Gestão de reclamações de horas com exportação e anexos |
 | **Calendário** | Editor de carga de trabalho por escritório/departamento/mês |
-| **Escalas** | Gestão de escalas de trabalho |
-| **Utilizadores** | Criação de contas, roles e permissões granulares |
+| **Escalas** | Gestão de escalas de trabalho por escritório (sub-coleção Firestore) |
+| **Chat** | Mensagens diretas e grupos entre todos os colaboradores (cross-office) |
+| **Utilizadores** | Criação de contas, roles, perfis e permissões granulares |
+| **Perfis** | Criação e gestão de perfis de permissão reutilizáveis |
 | **Definições** | Gestão de escritórios, seed de dados e acesso a módulos administrativos |
 | **Gerir Calendários** | Publicação e manutenção dos calendários |
 | **Auditoria** | Histórico das alterações da app |
@@ -72,16 +74,12 @@ O ficheiro `js/dashboard-customizer.js` gere a selecção e persistência do tem
 Existem duas estratégias de CSS conforme a página:
 
 **Páginas que carregam `styles.css`** (base partilhada):
-`tarefas`, `admissoes`, `reclamacoes`, `utilizadores`, `auditoria`, `seed`
+`tarefas`, `admissoes`, `reclamacoes`, `utilizadores`, `auditoria`, `seed`, `perfis`, `chat`
 
 **Páginas com CSS standalone** (têm o seu próprio `@import` e `:root`):
 `comunicados`, `calendario`, `gerir-calendarios`, `escalas`, `definicoes`
 
-Ambas as estratégias têm os blocos `[data-theme]` para que a cor de destaque mude com o tema seleccionado. Os ficheiros CSS standalone também incluem estes overrides directamente.
-
-### Botões primários
-
-Todos os botões de acção primária usam `background: var(--accent)`, que muda automaticamente com o tema. Nunca usar `background: var(--text)` para botões de acção.
+Ambas as estratégias têm os blocos `[data-theme]` para que a cor de destaque mude com o tema seleccionado.
 
 ---
 
@@ -91,14 +89,16 @@ Todos os botões de acção primária usam `background: var(--accent)`, que muda
 
 | Ficheiro | Função |
 |---|---|
-| `js/firebase-init.js` | Inicialização do Firebase |
-| `js/utils.js` | Utilitários partilhados (datas, UI, strings) |
-| `js/auth.js` | Autenticação, sessão e helpers de permissão |
-| `js/auditoria.js` | Registo de alterações no Firestore |
+| `js/firebase-init.js` | Inicialização do Firebase (expõe `window.firebaseAuth`, `window.firebaseDb`) |
+| `js/utils.js` | Utilitários partilhados (datas, UI, strings, `window.escHtml`, `window.toast`) |
+| `js/auth.js` | Autenticação, sessão e helpers de permissão (`window.temPermissao`, `window.isAdmin`) |
+| `js/auditoria.js` | Registo de alterações no Firestore (`window.registarAuditoria`) |
 | `js/users-service.js` | Serviço de utilizadores (CRUD, listeners, permissões) |
 | `js/offices-service.js` | Serviço de escritórios (CRUD, ordenação, cleanup) |
 | `js/tasks-service.js` | Serviço de domínio para tarefas |
 | `js/comunicados-service.js` | Serviço de domínio para comunicados |
+| `js/chat-service.js` | Serviço de domínio para chat (conversas, mensagens, lidos) |
+| `js/perfis-service.js` | Serviço de perfis de permissão (`window.PerfisService`) |
 | `js/config-escritorios.js` | Cache e helpers de escritório activo |
 | `js/module-registry.js` | Registry central dos módulos (navegação, ordem, visibilidade) |
 | `js/app-platform.js` | Bootstrap, navbar, sidebar, topbar e listeners de plataforma |
@@ -109,8 +109,8 @@ Todos os botões de acção primária usam `background: var(--accent)`, que muda
 Os dois pilares da app são **Utilizadores** e **Escritórios**. Qualquer módulo novo deve encaixar na mesma lógica de:
 
 - autenticação e sessão
-- permissões por role/utilizador
-- escritório activo como âmbito
+- permissões por perfil/role/utilizador
+- escritório activo como âmbito (ou `usesEscritorio: false` para módulos cross-office)
 - navegação via module registry
 - auditoria de alterações
 
@@ -122,8 +122,6 @@ O `app-platform.js` injeta automaticamente em todas as páginas protegidas:
 - **Topbar** com título da página, escritório activo e avatar do utilizador
 - **Menu mobile** de módulos
 
-O item activo na sidebar usa cores adaptadas ao tema seleccionado.
-
 ---
 
 ## Estrutura principal de ficheiros
@@ -134,11 +132,15 @@ hub-algartempo/
 ├── styles.css                  ← base partilhada (Inter, tokens, temas, componentes)
 ├── login.html
 ├── dashboard.html
+├── chat.html
+├── perfis.html
 ├── seed.html
 │
 ├── css/
 │   ├── login.css
 │   ├── dashboard.css
+│   ├── chat.css                ← usa styles.css como base
+│   ├── perfis.css              ← usa styles.css como base
 │   ├── comunicados.css         ← standalone (tem :root próprio + temas)
 │   ├── calendario.css          ← standalone
 │   ├── gerir-calendarios.css   ← standalone
@@ -159,6 +161,8 @@ hub-algartempo/
 │   ├── offices-service.js
 │   ├── tasks-service.js
 │   ├── comunicados-service.js
+│   ├── chat-service.js
+│   ├── perfis-service.js
 │   ├── config-escritorios.js
 │   ├── module-registry.js
 │   ├── app-platform.js
@@ -170,6 +174,8 @@ hub-algartempo/
 │   ├── reclamacoes.js
 │   ├── calendario.js
 │   ├── escalas.js
+│   ├── chat.js
+│   ├── perfis.js
 │   ├── definicoes.js
 │   ├── utilizadores.js
 │   ├── gerir-calendarios.js
@@ -181,6 +187,7 @@ hub-algartempo/
 │   └── module-template.css
 │
 ├── firestore.rules
+├── firestore.indexes.json      ← índice composto para chat (conversas)
 ├── storage.rules
 ├── firebase.json
 └── .firebaserc
@@ -196,7 +203,7 @@ hub-algartempo/
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- Base comum -->
+<!-- Base comum (ordem importa) -->
 <script src="js/firebase-init.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/module-registry.js"></script>
@@ -208,6 +215,9 @@ hub-algartempo/
 <!-- Módulo da página -->
 <script src="js/[pagina].js"></script>
 ```
+
+Se a página usar auditoria: carregar `js/auditoria.js` depois de `auth.js`.
+Se a página usar o serviço de utilizadores: carregar `js/users-service.js` depois de `auth.js`.
 
 ---
 
@@ -249,7 +259,7 @@ window.bootProtectedPage({
   group: 'main',
   order: 70,
   adminOnly: false,
-  requiredPermissions: [],
+  requiredPermissions: ['modules.frota.view'],
   usesEscritorio: true,
 }
 ```
@@ -259,6 +269,8 @@ window.bootProtectedPage({
 5. Se tiver dados próprios, criar `js/[modulo]-service.js`
 6. Para CSS standalone: copiar o bloco `:root` + `[data-theme]` de um módulo existente
 7. Partir dos templates em `templates/`
+8. **Integrar com escritórios desde o início** — usar seletor de pills para admin, subtítulo com escritório ativo para utilizador comum
+9. **Adicionar permissões ao `perfis-service.js`** — em `MODULE_ACTIONS` para incluir o novo módulo nos perfis configuráveis
 
 ---
 
@@ -267,34 +279,62 @@ window.bootProtectedPage({
 | API | Função |
 |---|---|
 | `window.userProfile` | Objeto do utilizador autenticado |
-| `window.temPermissao(p)` | Verifica permissão |
+| `window.currentUser` | Objeto Firebase Auth |
+| `window.temPermissao(p)` | Verifica permissão do utilizador atual |
+| `window.temPermissaoNoPerfil(profile, p)` | Verifica permissão num perfil arbitrário |
 | `window.escritorioAtivo()` | ID do escritório activo |
-| `window.loadEscritorios()` | Lista de escritórios |
+| `window.loadEscritorios()` | Lista de escritórios (Promise) |
+| `window.getEscritoriosSync()` | Lista de escritórios (síncrono, da cache) |
+| `window.nomeEscritorio(id)` | Nome legível do escritório |
 | `window.renderNavbar(page)` | Re-renderiza sidebar + topbar |
-| `window.db` | Referência Firestore |
 | `window.isAdmin()` | Verifica se é admin |
+| `window.registarAuditoria({acao, dados})` | Grava entrada de auditoria |
+| `window.PerfisService` | API de perfis de permissão |
+| `window.ChatService` | API de chat (conversas e mensagens) |
+| `firebase.firestore()` | Referência Firestore (usar diretamente; `window.db` não existe) |
+
+> **Nota:** `firebase-init.js` expõe `window.firebaseAuth` e `window.firebaseDb` mas a convenção nos services é usar `firebase.firestore()` diretamente.
 
 ---
 
 ## Sistema de permissões
 
-### Permissões actuais (em uso)
+### Arquitetura
 
-| Permissão | Permite |
+As permissões são escritas diretamente no documento do utilizador (`utilizadores/{uid}.permissoes`) em formato canónico. As Firestore Rules lêem estas permissões via `map.get()` dinâmico — não precisam de switch hardcoded por módulo.
+
+### Perfis de permissão
+
+Os perfis são geridos em `config/perfis` e atribuídos via `perfis.html`. Quando um perfil é aplicado a um utilizador, as suas permissões são **denormalizadas** para `utilizadores/{uid}.permissoes`. Assim:
+
+- Firestore Rules lêem apenas um documento por pedido
+- Não há `get()` extra nas rules
+- Atualizar um perfil propaga automaticamente a todos os utilizadores com esse perfil
+
+| Perfil | Descrição |
 |---|---|
-| `criarTarefas` | Criar tarefas |
-| `resolverTarefas` | Alterar estado de tarefas |
-| `gerirComunicados` | Criar, editar e arquivar comunicados |
-| `criarAdmissoes` | Criar processos de admissão/cessação |
-| `resolverAdmissoes` | Alterar estado de admissões/cessações |
-| `editarCalendario` | Editar calendário de trabalho |
-| `criarReclamacoes` | Criar reclamações internas de horas |
+| **Rececionista** | Ver tudo, criar admissões |
+| **Técnico** | Criar e gerir tarefas, admissões, reclamações |
+| **Gestor RH** | Acesso completo a todos os módulos operacionais |
+| **Gestor Operacional** | Como Gestor RH mas sem admissões |
 
-### Permissões canónicas (para módulos novos)
+### Permissões canónicas
 
 Padrão: `modules.<modulo>.<acao>`
 
-Exemplos: `modules.frota.view`, `modules.frota.create`, `modules.frota.edit`
+| Ação | Descrição |
+|---|---|
+| `view` | Ver o módulo (se `false`, o módulo não aparece na navegação) |
+| `create` | Criar novos registos |
+| `resolve` | Gerir/fechar registos existentes |
+| `edit` | Editar conteúdo (calendário) |
+| `manage` | Criar, editar e apagar (comunicados, reclamações, escalas) |
+
+### Permissões legacy (ainda em uso para compatibilidade)
+
+`criarTarefas`, `resolverTarefas`, `gerirComunicados`, `criarAdmissoes`, `resolverAdmissoes`, `editarCalendario`, `criarReclamacoes`
+
+Estas são mapeadas para as canónicas em `auth.js` (`LEGACY_PERMISSION_MAP`) e nas Firestore Rules (`legacyPerm`).
 
 ---
 
@@ -315,6 +355,28 @@ Guardados em `config/escritorios`. Formato:
 
 Escritórios inativos não aparecem nos módulos. O escritório default serve de fallback. Novos módulos devem consumir via `loadEscritorios()`, nunca arrays hardcoded.
 
+Módulos cross-office (como chat) devem declarar `usesEscritorio: false` no module registry.
+
+---
+
+## Estrutura Firestore
+
+| Coleção | Estrutura | Notas |
+|---|---|---|
+| `utilizadores/{uid}` | Perfil, permissões, escritório | Fonte de verdade das rules |
+| `config/escritorios` | `{ lista: [...] }` | Lista de escritórios |
+| `config/perfis` | `{ lista: [...] }` | Perfis de permissão |
+| `tarefas_todo/{id}` | Tarefa com `escritorio` | Filtrado por escritório |
+| `comunicados/{id}` | Comunicado com `destinosEscritorio` | Filtrado por destinos |
+| `admissoes/{id}` | Processo com `escritorio` | Filtrado por escritório |
+| `reclamacoes_horas/{id}` | Reclamação com `escritorio` | Filtrado por escritório |
+| `calendarios/{id}` | Calendário | Acesso universal |
+| `escalas/{escritorioId}/dias/{YYYY-MM-DD}` | Escala diária | Sub-coleção por escritório |
+| `conversas/{id}` | Conversa com `participantes[]` | Cross-office |
+| `conversas/{id}/mensagens/{id}` | Mensagem individual | Imutável após criação |
+| `chat_lidos/{uid}_{conversaId}` | Timestamp de último lido | Por utilizador |
+| `auditoria/{id}` | Entrada de auditoria | Append-only |
+
 ---
 
 ## Firestore Rules
@@ -322,11 +384,11 @@ Escritórios inativos não aparecem nos módulos. O escritório default serve de
 Ficheiro: `firestore.rules`
 
 - Leitura/escrita apenas para utilizadores autenticados
-- Perfil do utilizador como fonte de verdade para `role`, `ativo` e `permissoes`
-- Controlo por módulo e por escritório quando aplicável
-- Fallback legacy para permissões antigas durante migração
-
-Estas rules são uma primeira base e devem ser revistas antes de deploy final.
+- Permissões verificadas via `canonicalPerm(module, action)` com `map.get()` dinâmico — **escalável para qualquer módulo novo sem alterar as rules**
+- Fallback `legacyPerm(module, action)` para permissões antigas durante migração
+- Controlo por escritório via `officeMatches()` e `destinosMatch()`
+- Chat protegido por `participantes[]`
+- Auditoria append-only (update/delete proibidos)
 
 ---
 
@@ -335,11 +397,18 @@ Estas rules são uma primeira base e devem ser revistas antes de deploy final.
 - **projectId:** `hub-algartempo`
 
 ```bash
+# Login
 firebase login --reauth
 firebase use hub-algartempo
-firebase deploy --only firestore:rules
+
+# Deploy regras + índices (recomendado após alterações)
+npx firebase-tools deploy --only firestore:rules,firestore:indexes --project hub-algartempo
+
+# Deploy storage
 firebase deploy --only storage
 ```
+
+> Usar `npx firebase-tools` em vez de `firebase` para evitar problemas de execution policy no Windows.
 
 Testar localmente:
 
@@ -364,16 +433,16 @@ Com VS Code + Live Server:
 | Item | Estado |
 |---|---|
 | Firestore Security Rules | Precisam de endurecimento antes de produção |
-| Permissões | Ainda centradas no frontend |
 | Criação de utilizadores | Feita do lado do cliente admin |
-| Dark mode | Estrutura preparada (classe `.dark`) mas não implementado |
+| Dark mode | Estrutura preparada (classe `.dark`) mas não implementado na maioria das páginas |
+| Migração dados escalas | Dados no path antigo `escalas/{date}` não são lidos; novo path é `escalas/{escritorioId}/dias/{date}` |
 
 ---
 
 ## Próximos passos recomendados
 
-- [ ] Endurecer Firestore Rules e Storage Rules
+- [ ] Endurecer Firestore Rules e Storage Rules antes de produção
 - [ ] Migrar criação de utilizadores para backend/server-side
-- [ ] Evoluir permissões para convenção canónica por módulo
-- [ ] Implementar dark mode (variáveis e lógica de toggle já previstas)
+- [ ] Implementar dark mode completo
+- [ ] Migrar dados existentes de escalas para o novo path com sub-coleção
 - [ ] Adicionar testes para fluxos críticos de auth, escritório e permissões
