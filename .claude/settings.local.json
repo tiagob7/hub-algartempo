@@ -15,7 +15,8 @@
       "Bash(grep -n \"query.onSnapshot\\\\|col.onSnapshot\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
       "Bash(grep -n \"orderBy.*limit\\\\|\\\\.where.*limit\" /c/Users/Tiago/Documents/GitHub/Calendario/*.html)",
       "Bash(python3:*)",
-      "Bash(del \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\firebase-init.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\auth.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\utils.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\auditoria.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\config-escritorios.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\voz-ai.js\")"
+      "Bash(del \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\firebase-init.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\auth.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\utils.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\auditoria.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\config-escritorios.js\" \"C:\\\\Users\\\\Tiago\\\\Documents\\\\GitHub\\\\Calendario\\\\voz-ai.js\")",
+      "Bash(firebase use:*)"
     ]
   }
 }
