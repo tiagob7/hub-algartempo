@@ -86,7 +86,7 @@
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = event => resolve(event.target.result);
-      reader.onerror = () => reject(new Error('Nao foi possivel ler o ficheiro.'));
+      reader.onerror = () => reject(new Error('Não foi possível ler o ficheiro.'));
       reader.readAsArrayBuffer(file);
     });
   }
@@ -112,11 +112,11 @@
   }
 
   function parseWorkbook(buffer) {
-    if (!window.XLSX) throw new Error('A biblioteca XLSX nao esta disponivel nesta pagina.');
+    if (!window.XLSX) throw new Error('A biblioteca XLSX não está disponível nesta página.');
 
     const workbook = XLSX.read(buffer, { type: 'array', cellDates: false });
     const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) throw new Error('O ficheiro nao contem folhas para importar.');
+    if (!firstSheetName) throw new Error('O ficheiro não contém folhas para importar.');
 
     const worksheet = workbook.Sheets[firstSheetName];
     const matrix = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, defval: '' });
@@ -306,7 +306,7 @@
 
   async function applyImport(previewPayload) {
     if (!previewPayload || !Array.isArray(previewPayload.clients) || !previewPayload.clients.length) {
-      throw new Error('Nao existe preview valido para aplicar.');
+      throw new Error('Não existe preview válido para aplicar.');
     }
 
     const importableClients = previewPayload.clients.filter(item => !item.isBlocked);

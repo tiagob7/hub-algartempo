@@ -144,7 +144,7 @@
             numeroClientes: result.totalClientes,
             sourceFile: result.sourceFile,
           },
-          nota: 'Importacao Excel de clientes concluida.',
+          nota: 'Importação Excel de clientes concluída.',
         });
       }
 
