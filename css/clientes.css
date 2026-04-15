@@ -142,7 +142,7 @@
 
 .clientes-preview-sub {
   margin-top: 3px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 
@@ -155,9 +155,9 @@
   gap: 5px;
   padding: 4px 9px;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: .08em;
+  letter-spacing: .07em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -195,7 +195,7 @@
 }
 
 .clientes-preview-note {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.65;
   color: var(--muted);
   padding: 10px 12px;
@@ -212,6 +212,8 @@
   margin-top: 16px;
 }
 
+/* ---- WORKSPACE ---- */
+
 .clientes-workspace {
   display: grid;
   grid-template-columns: minmax(360px, .95fr) minmax(420px, 1.2fr);
@@ -222,6 +224,13 @@
 .clientes-column {
   min-width: 0;
 }
+
+.clientes-column-detail {
+  position: sticky;
+  top: 58px;
+}
+
+/* ---- PANELS ---- */
 
 .clientes-panel {
   background: var(--surface);
@@ -255,17 +264,20 @@
   display: grid;
   gap: 8px;
   padding: 12px;
-  max-height: calc(100vh - 290px);
+  max-height: calc(100vh - 310px);
   overflow: auto;
 }
+
+/* ---- CLIENT LIST CARDS ---- */
 
 .cliente-list-card {
   position: relative;
   display: grid;
-  gap: 10px;
-  padding: 15px 15px 14px;
+  gap: 8px;
+  padding: 14px 14px 13px 16px;
   border-radius: 16px;
   border: 1px solid var(--border);
+  border-left: 3px solid transparent;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--surface2) 76%, var(--surface)) 0%, var(--surface) 58%),
     radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 8%, transparent), transparent 40%);
@@ -276,12 +288,17 @@
 .cliente-list-card:hover {
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+  border-left-color: color-mix(in srgb, var(--accent) 40%, var(--border));
   box-shadow: 0 14px 30px rgba(15, 23, 42, .06);
 }
 
 .cliente-list-card.active {
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
-  box-shadow: 0 18px 36px rgba(2, 132, 199, .11);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-left-color: var(--accent);
+  box-shadow: 0 18px 36px rgba(2, 132, 199, .1);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--blue-bg) 60%, var(--surface)) 0%, var(--surface) 58%),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 10%, transparent), transparent 40%);
 }
 
 .cliente-list-card-head {
@@ -299,48 +316,22 @@
 }
 
 .cliente-list-sub {
-  margin-top: 4px;
-  font-size: 10px;
+  margin-top: 3px;
+  font-size: 11px;
   color: var(--muted);
 }
 
 .cliente-list-metas {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
-.cliente-list-prices {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.cliente-mini-stat {
-  padding: 9px 10px;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-.cliente-mini-stat strong {
-  display: block;
-  font-family: 'Poppins', sans-serif;
-  font-size: 15px;
-  letter-spacing: -.03em;
-}
-
-.cliente-mini-stat span {
-  display: block;
-  margin-top: 2px;
-  font-size: 9px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
+/* ---- DETAIL PANEL ---- */
 
 .clientes-detail-panel {
-  min-height: 620px;
+  max-height: calc(100vh - 74px);
+  overflow-y: auto;
 }
 
 .clientes-detail-empty,
@@ -371,8 +362,8 @@
 }
 
 .clientes-detail-titleblock h2 {
-  font-size: clamp(22px, 2vw, 30px);
-  line-height: 1.05;
+  font-size: clamp(20px, 2vw, 28px);
+  line-height: 1.1;
   margin: 0;
 }
 
@@ -396,10 +387,10 @@
 }
 
 .clientes-detail-card-label {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: .08em;
+  letter-spacing: .07em;
 }
 
 .clientes-detail-card-value {
@@ -408,6 +399,8 @@
   font-weight: 600;
   line-height: 1.45;
 }
+
+/* ---- SECTIONS ---- */
 
 .clientes-section {
   display: grid;
@@ -426,6 +419,8 @@
   font-size: 14px;
   font-weight: 700;
 }
+
+/* ---- PRICES TABLE ---- */
 
 .clientes-prices-table {
   width: 100%;
@@ -448,8 +443,8 @@
 }
 
 .clientes-prices-table th {
-  font-size: 9px;
-  letter-spacing: .08em;
+  font-size: 11px;
+  letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--muted);
   background: var(--surface2);
@@ -470,6 +465,8 @@
   font-size: 10px;
   color: var(--muted);
 }
+
+/* ---- HISTORY / PROPOSALS ---- */
 
 .clientes-history-list {
   display: grid;
@@ -497,7 +494,7 @@
 
 .clientes-history-item p {
   margin-top: 4px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.65;
   color: var(--muted);
 }
@@ -514,6 +511,109 @@
   color: var(--muted);
 }
 
+/* ---- PROPOSAL PREVIEW TABLE ---- */
+
+.clientes-proposal-preview {
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.clientes-proposal-preview .clientes-prices-table th,
+.clientes-proposal-preview .clientes-prices-table td {
+  font-size: 11px;
+  padding: 8px 10px;
+}
+
+/* ---- DETAIL ACTIONS ---- */
+
+.clientes-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ---- EDIT FORMS ---- */
+
+.clientes-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.clientes-edit-field {
+  display: grid;
+  gap: 5px;
+}
+
+/* ---- PRICES EDIT MODE ---- */
+
+.clientes-prices-table.edit-mode td {
+  padding: 5px 6px;
+  vertical-align: middle;
+}
+
+.clientes-prices-table.edit-mode td:last-child {
+  width: 38px;
+  padding: 4px 6px;
+}
+
+.clientes-prices-table.edit-mode .form-input {
+  padding: 5px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+
+.clientes-row-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.clientes-row-remove:hover {
+  background: color-mix(in srgb, #ef4444 12%, var(--surface));
+  border-color: color-mix(in srgb, #ef4444 40%, var(--border));
+  color: #ef4444;
+}
+
+.clientes-add-row-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.clientes-add-row-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+/* ---- RESPONSIVE ---- */
+
 @media (max-width: 1180px) {
   .clientes-workspace,
   .clientes-import-grid,
@@ -524,11 +624,20 @@
   .clientes-list {
     max-height: none;
   }
+
+  .clientes-column-detail {
+    position: static;
+  }
+
+  .clientes-detail-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
 }
 
 @media (max-width: 820px) {
   .clientes-filters,
-  .cliente-list-prices {
+  .clientes-edit-grid {
     grid-template-columns: 1fr;
   }
 
@@ -537,6 +646,11 @@
   .clientes-history-item-head {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .clientes-detail-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 
