@@ -43,6 +43,9 @@
         return {
           limit(limitValue) {
             return {
+              get() {
+                return collection().orderBy(field, direction).limit(limitValue).get();
+              },
               onSnapshot(onData, onError) {
                 return collection().orderBy(field, direction).limit(limitValue).onSnapshot(onData, onError);
               },
