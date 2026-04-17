@@ -330,7 +330,9 @@
 /* ---- DETAIL PANEL ---- */
 
 .clientes-detail-panel {
+  min-width: 0;
   max-height: calc(100vh - 74px);
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -365,12 +367,24 @@
   font-size: clamp(20px, 2vw, 28px);
   line-height: 1.1;
   margin: 0;
+  overflow-wrap: break-word;
 }
 
 .clientes-detail-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.clientes-detail-meta .clientes-soft-badge {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.clientes-back-btn {
+  display: none;
 }
 
 .clientes-detail-grid {
@@ -651,6 +665,38 @@
   .clientes-detail-actions {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  /* Master-detail: um painel de cada vez */
+  .clientes-workspace {
+    display: block;
+  }
+
+  .clientes-column-detail {
+    display: none;
+    position: static;
+  }
+
+  .clientes-workspace.mobile-detail .clientes-column-list {
+    display: none;
+  }
+
+  .clientes-workspace.mobile-detail .clientes-column-detail {
+    display: block;
+  }
+
+  .clientes-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 0 0 4px;
+    margin-bottom: 8px;
+    font-family: inherit;
   }
 }
 

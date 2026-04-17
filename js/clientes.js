@@ -14,6 +14,15 @@
 
   const dom = {};
 
+  function isMobile() {
+    return window.innerWidth <= 820;
+  }
+
+  function closeMobileDetail() {
+    const ws = document.querySelector('.clientes-workspace');
+    if (ws) ws.classList.remove('mobile-detail');
+  }
+
   // ---- DOM CACHE ----
 
   function cacheDom() {
@@ -326,6 +335,11 @@
       card.addEventListener('click', () => {
         if (state.editMode) return;
         state.selectedId = card.getAttribute('data-id');
+        if (isMobile()) {
+          const ws = document.querySelector('.clientes-workspace');
+          if (ws) ws.classList.add('mobile-detail');
+          history.pushState({ clienteDetail: state.selectedId }, '');
+        }
         render();
       });
     });
@@ -336,8 +350,10 @@
   function renderDetail() {
     const c = getSelected();
 
+    const backBtn = `<button class="clientes-back-btn" onclick="window.ClientesPage.closeMobileDetail()">&#8249; Voltar</button>`;
+
     if (!c) {
-      dom.clienteDetail.innerHTML = `
+      dom.clienteDetail.innerHTML = backBtn + `
         <div class="empty-state clientes-detail-empty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="7" r="4"/><path d="M2 21v-1a6 6 0 0 1 6-6h1"/><path d="M17 11v6m-3-3h6"/></svg>
           <div class="empty-title">Seleciona um cliente</div>
@@ -440,7 +456,7 @@
           </article>`).join('')}
       </div>` : '<div class="clientes-empty-note">Sem histórico de importações.</div>';
 
-    dom.clienteDetail.innerHTML = `
+    dom.clienteDetail.innerHTML = backBtn + `
       <div class="clientes-detail-wrap">
 
         <div class="clientes-detail-main">
@@ -454,7 +470,6 @@
 
           <div class="clientes-detail-meta">
             ${c.numeroCliente ? `<span class="clientes-soft-badge">Nº ${window.escHtml(c.numeroCliente)}</span>` : ''}
-            ${c.grupo ? `<span class="clientes-soft-badge">${window.escHtml(c.grupo)}</span>` : ''}
             ${c.escritorioOrigem ? `<span class="clientes-soft-badge">${window.escHtml(c.escritorioOrigem)}</span>` : ''}
           </div>
 
@@ -913,11 +928,19 @@
     window.addEventListener('beforeunload', () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     });
+
+    window.addEventListener('popstate', () => {
+      const ws = document.querySelector('.clientes-workspace');
+      if (ws && ws.classList.contains('mobile-detail')) {
+        closeMobileDetail();
+      }
+    });
   }
 
   // ---- EXPOSE ----
 
   window.ClientesPage = {
+    closeMobileDetail,
     toggleImportPanel,
     confirmImport,
     cancelImportPreview,
