@@ -31,6 +31,7 @@
   --red:  #dc2626;  --red-bg:  #fef2f2; --red-border:  #fecaca;
   --amber:#d97706;  --amber-bg:#fffbeb; --amber-border:#fde68a;
   --purple:#7c3aed; --purple-bg:#f5f3ff;--purple-border:#ddd6fe;
+  --teal:#0d9488;   --teal-bg:#f0fdfa;  --teal-border:#99f6e4;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
@@ -61,12 +62,13 @@ html.dark {
   --surface2:#242220;
   --border:  #312f2c;
   --text:    #e8e6e1;
-  --muted:   #5a5754;
+  --muted:   #8a8784;
   --green:  #3bb870;  --green-bg:  #0c1f14;  --green-border:  #1a3d26;
   --blue:   #4db8ad;  --blue-bg:   #0f2e2b;  --blue-border:   #1e4d48;
   --red:    #e87060;  --red-bg:    #1f0d0a;  --red-border:    #3d1810;
   --amber:  #d4900a;  --amber-bg:  #1a1200;  --amber-border:  #3d2c00;
   --purple: #9b7fe0;  --purple-bg: #130e1f;  --purple-border: #2a1e50;
+  --teal:   #2dd4bf;  --teal-bg:   #0a2020;  --teal-border:   #1a3838;
   --sidebar-bg: #121f1c;
 }
 html.dark body { color-scheme: dark; }
@@ -80,6 +82,7 @@ html[data-theme="forest"]:not(.dark) {
   --blue-bg: #ecfeff;
   --blue-border: #99f6e4;
   --sidebar-bg: #12312b;
+  --bg: #f0fffe;
 }
 
 html[data-theme="sunset"]:not(.dark) {
@@ -91,6 +94,7 @@ html[data-theme="sunset"]:not(.dark) {
   --blue-bg: #fff7ed;
   --blue-border: #fdba74;
   --sidebar-bg: #3c1f12;
+  --bg: #fefaf5;
 }
 
 html[data-theme="violet"]:not(.dark) {
@@ -102,6 +106,7 @@ html[data-theme="violet"]:not(.dark) {
   --blue-bg: #f5f3ff;
   --blue-border: #c4b5fd;
   --sidebar-bg: #21163d;
+  --bg: #faf8ff;
 }
 
 /* ── Reset & Base ─────────────────────────────────────────────── */
@@ -1380,7 +1385,7 @@ h1 {
 .rec-dash-dot.verificacao  { background: var(--amber); }
 .rec-dash-dot.enviada      { background: var(--blue); }
 .rec-dash-dot.confirmada   { background: var(--purple); }
-.rec-dash-dot.aguarda-proc { background: #0d9488; }
+.rec-dash-dot.aguarda-proc { background: var(--teal); }
 
 .rec-dash-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .rec-dash-meta { font-size: 11px; color: var(--muted); white-space: nowrap; }
@@ -1396,7 +1401,7 @@ h1 {
 .rec-kpi-chip.verificacao  { background: var(--amber-bg); color: var(--amber);   border-color: var(--amber-border); }
 .rec-kpi-chip.enviada      { background: var(--blue-bg);  color: var(--blue);    border-color: var(--blue-border); }
 .rec-kpi-chip.confirmada   { background: var(--purple-bg);color: var(--purple);  border-color: var(--purple-border); }
-.rec-kpi-chip.aguarda-proc { background: #f0fdfa; color: #0d9488; border-color: #99f6e4; }
+.rec-kpi-chip.aguarda-proc { background: var(--teal-bg); color: var(--teal); border-color: var(--teal-border); }
 
 /* ════════════════════════════════════════════════════════════════
    CALENDÁRIO MINI
