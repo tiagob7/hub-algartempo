@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registo de Visitas</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/visitas.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page">
+  <div class="header-top">
+    <h1>Registo de Visitas</h1>
+    <span id="syncStatus"></span>
+  </div>
+  <p class="subtitle" id="pageSubtitle">A carregar…</p>
+
+  <div class="stats-row">
+    <div class="stat-chip s-total"><span class="stat-label">Total</span><span class="stat-val" id="statTotal">—</span></div>
+    <div class="stat-chip s-agendada"><span class="stat-label">Agendadas</span><span class="stat-val" id="statAgendada">—</span></div>
+    <div class="stat-chip s-realizada"><span class="stat-label">Realizadas</span><span class="stat-val" id="statRealizada">—</span></div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-panel" id="formPanel">
+    <div class="panel-title panel-toggle" onclick="toggleForm()">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5l2 1.5"/></svg>
+      Registar Nova Visita
+      <span class="panel-toggle-chevron">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </span>
+    </div>
+    <div class="form-panel-body">
+      <div class="form-grid">
+        <div>
+          <label class="field-label">Cliente / Entidade *</label>
+          <input type="text" class="form-input" id="fCliente" placeholder="ex: Empresa ABC" maxlength="100" autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label">Local</label>
+          <input type="text" class="form-input" id="fLocal" placeholder="ex: Lisboa, Escritório do cliente" maxlength="100" autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label">Data da visita *</label>
+          <input type="date" class="form-input" id="fData">
+        </div>
+        <div>
+          <label class="field-label">Tipo</label>
+          <select class="form-select" id="fTipo">
+            <option value="reuniao">Reunião</option>
+            <option value="demonstracao">Demonstração</option>
+            <option value="auditoria">Auditoria</option>
+            <option value="formacao">Formação</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Responsável</label>
+          <input type="text" class="form-input" id="fResponsavel" placeholder="Nome do responsável" maxlength="80" autocomplete="off">
+        </div>
+        <div id="fEscritorioWrap">
+          <label class="field-label">Escritório</label>
+          <select class="form-select" id="fEscritorio"><option value="">A carregar…</option></select>
+        </div>
+        <div class="full">
+          <label class="field-label">Descrição / objetivo</label>
+          <textarea class="form-textarea" id="fDescricao" placeholder="Objetivo e detalhes da visita…" maxlength="500"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+        <button class="btn btn-primary" onclick="submitVisita()">Registar visita</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-wrap">
+    <div class="controls-row">
+      <span class="ctrl-label">Estado:</span>
+      <button class="filter-btn active" data-f="todos" onclick="setFiltro('todos')">Todos</button>
+      <button class="filter-btn" data-f="agendada" onclick="setFiltro('agendada')">Agendadas</button>
+      <button class="filter-btn" data-f="realizada" onclick="setFiltro('realizada')">Realizadas</button>
+      <button class="filter-btn" data-f="cancelada" onclick="setFiltro('cancelada')">Canceladas</button>
+      <span class="count-badge" id="countBadge"></span>
+    </div>
+    <div class="controls-row" id="adminFilters" style="display:none;">
+      <span class="ctrl-label">Escritório:</span>
+      <select class="filter-select" id="filterEscritorio" onchange="setFiltroEscritorio(this.value)">
+        <option value="">Todos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="visitas-list" id="visitasList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/visitas-service.js"></script>
+<script src="js/visitas.js"></script>
+</body>
+</html>

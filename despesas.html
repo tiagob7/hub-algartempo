@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notas de Despesa</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/despesas.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page">
+  <div class="header-top">
+    <h1>Notas de Despesa</h1>
+    <span id="syncStatus"></span>
+  </div>
+  <p class="subtitle" id="pageSubtitle">A carregar…</p>
+
+  <div class="stats-row">
+    <div class="stat-chip s-valor"><span class="stat-label">Pendente (€)</span><span class="stat-val" id="statValor">—</span></div>
+    <div class="stat-chip s-pendente"><span class="stat-label">Pendentes</span><span class="stat-val" id="statPendente">—</span></div>
+    <div class="stat-chip s-aprovado"><span class="stat-label">Aprovadas</span><span class="stat-val" id="statAprovado">—</span></div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-panel" id="formPanel">
+    <div class="panel-title panel-toggle" onclick="toggleForm()">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="9" rx="1.5"/><path d="M1 7h14"/><circle cx="5" cy="10.5" r="1"/></svg>
+      Nova Despesa
+      <span class="panel-toggle-chevron">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </span>
+    </div>
+    <div class="form-panel-body">
+      <div class="form-grid">
+        <div>
+          <label class="field-label">Categoria *</label>
+          <select class="form-select" id="fCategoria">
+            <option value="alimentacao">Alimentação</option>
+            <option value="transporte">Transporte</option>
+            <option value="alojamento">Alojamento</option>
+            <option value="material">Material de escritório</option>
+            <option value="comunicacoes">Comunicações</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Valor (€) *</label>
+          <input type="number" class="form-input" id="fValor" placeholder="0.00" min="0.01" step="0.01">
+        </div>
+        <div>
+          <label class="field-label">Data *</label>
+          <input type="date" class="form-input" id="fData">
+        </div>
+        <div id="fEscritorioWrap">
+          <label class="field-label">Escritório</label>
+          <select class="form-select" id="fEscritorio"><option value="">A carregar…</option></select>
+        </div>
+        <div class="full">
+          <label class="field-label">Descrição *</label>
+          <input type="text" class="form-input" id="fDescricao" placeholder="ex: Almoço com cliente ABC" maxlength="200" autocomplete="off">
+        </div>
+        <div class="full">
+          <label class="field-label">Recibo (opcional)</label>
+          <label class="btn-attach">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V6L9 2z"/><path d="M9 2v4h4"/></svg>
+            Anexar recibo
+            <input type="file" id="fRecibo" accept="image/*,.pdf" onchange="onReciboChange(this)">
+          </label>
+          <div class="upload-status" id="uploadStatus"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+        <button class="btn btn-primary" onclick="submitDespesa()">Submeter despesa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-wrap">
+    <div class="controls-row">
+      <span class="ctrl-label">Estado:</span>
+      <button class="filter-btn active" data-f="todos" onclick="setFiltro('todos')">Todos</button>
+      <button class="filter-btn" data-f="pendente" onclick="setFiltro('pendente')">Pendentes</button>
+      <button class="filter-btn" data-f="aprovado" onclick="setFiltro('aprovado')">Aprovadas</button>
+      <button class="filter-btn" data-f="rejeitado" onclick="setFiltro('rejeitado')">Rejeitadas</button>
+      <span class="count-badge" id="countBadge"></span>
+    </div>
+    <div class="controls-row" id="adminFilters" style="display:none;">
+      <span class="ctrl-label">Escritório:</span>
+      <select class="filter-select" id="filterEscritorio" onchange="setFiltroEscritorio(this.value)">
+        <option value="">Todos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="despesas-list" id="despesasList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/despesas-service.js"></script>
+<script src="js/despesas.js"></script>
+</body>
+</html>
