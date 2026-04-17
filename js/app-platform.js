@@ -52,10 +52,6 @@
         transition: width .28s ease;
       }
 
-      html.dark .app-shell-sidebar {
-        background: #121f1c;
-      }
-
       .app-shell-sidebar.collapsed {
         width: 68px;
       }

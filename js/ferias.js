@@ -11,6 +11,7 @@
   let filtroEstadoLista = 'todos';
   let selStart = null;
   let isAdmin = false;
+  let podeGerir = false;
   let currentUid = '';
   let unsub = null;
 
@@ -30,10 +31,11 @@
     moduleId: 'ferias',
   }, ({ profile, escritorio }) => {
     isAdmin = profile.role === 'admin';
+    podeGerir = isAdmin || window.temPermissao('modules.ferias.manage');
     currentUid = profile.uid;
     document.getElementById('pageSubtitle').textContent =
-      isAdmin ? 'Gestão de pedidos de ausência' : 'Os teus pedidos de ausência';
-    if (isAdmin) {
+      podeGerir ? 'Gestão de pedidos de ausência' : 'Os teus pedidos de ausência';
+    if (podeGerir) {
       document.getElementById('fEscritorioWrap').style.display = '';
       popularEscritorios();
     }
@@ -89,7 +91,7 @@
   function pedidosVisiveis(opts) {
     const forCal = (opts || {}).forCal;
     return allPedidos.filter(p => {
-      if (!isAdmin && p.uid !== currentUid) return false;
+      if (!podeGerir && p.uid !== currentUid) return false;
       if (filtroEscritorio && p.escritorio !== filtroEscritorio) return false;
       if (forCal) {
         if (!calEstados.includes(p.estado)) return false;
@@ -162,7 +164,7 @@
   // ── Stats ──────────────────────────────────────────────────
   function renderStats() {
     const ano = new Date().getFullYear();
-    const set = isAdmin ? allPedidos : allPedidos.filter(p => p.uid === currentUid);
+    const set = podeGerir ? allPedidos : allPedidos.filter(p => p.uid === currentUid);
     document.getElementById('statTotal').textContent    = set.length;
     document.getElementById('statPendente').textContent = set.filter(p => p.estado === 'pendente').length;
     document.getElementById('statAprovado').textContent = set.filter(p => p.estado === 'aprovado').length;
@@ -181,7 +183,7 @@
     if (!container) return;
     const seen = new Map();
     allPedidos.forEach(p => {
-      if (!isAdmin && p.uid !== currentUid) return;
+      if (!podeGerir && p.uid !== currentUid) return;
       if (filtroEscritorio && p.escritorio !== filtroEscritorio) return;
       if (!seen.has(p.uid)) seen.set(p.uid, p.nomeCompleto || p.email || p.uid);
     });
@@ -207,7 +209,7 @@
   };
 
   window.chipToggleAll = function() {
-    const seen = new Set(allPedidos.filter(p => isAdmin || p.uid === currentUid).map(p => p.uid));
+    const seen = new Set(allPedidos.filter(p => podeGerir || p.uid === currentUid).map(p => p.uid));
     const allHidden = seen.size > 0 && [...seen].every(uid => hiddenUids.has(uid));
     if (allHidden) hiddenUids.clear(); else seen.forEach(uid => hiddenUids.add(uid));
     render();
@@ -239,7 +241,7 @@
     const tipoLabel = { ferias:'Férias', folga:'Folga', licenca:'Licença', outro:'Outro' }[p.tipo] || p.tipo;
     const cor = collabColors[p.uid] || 'var(--accent)';
     const acoes = [];
-    if (isAdmin && p.estado === 'pendente') acoes.push(`
+    if (podeGerir && p.estado === 'pendente') acoes.push(`
       <input class="obs-input" id="obs_${p.id}" placeholder="Observação (opcional)">
       <button class="btn btn-secondary btn-sm" onclick="aprovar('${p.id}')">✓ Aprovar</button>
       <button class="btn btn-red btn-sm" onclick="rejeitar('${p.id}')">✕ Rejeitar</button>`);
