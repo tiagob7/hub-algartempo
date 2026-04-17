@@ -8,9 +8,21 @@
   --red:#dc2626;   --red-bg:#fef2f2;   --red-border:#fecaca;
   --blue-bg:#f0f9ff; --blue-border:#bae6fd;
 }
-html[data-theme="forest"]:not(.dark){--accent:#0f766e;}
-html[data-theme="sunset"]:not(.dark){--accent:#c2410c;}
-html[data-theme="violet"]:not(.dark){--accent:#7c3aed;}
+html[data-theme="forest"]:not(.dark){--accent:#0f766e;--blue:#0f766e;--blue-bg:#ecfeff;--blue-border:#99f6e4;--bg:#f0fffe;}
+html[data-theme="sunset"]:not(.dark){--accent:#c2410c;--blue:#c2410c;--blue-bg:#fff7ed;--blue-border:#fdba74;--bg:#fefaf5;}
+html[data-theme="violet"]:not(.dark){--accent:#7c3aed;--blue:#7c3aed;--blue-bg:#f5f3ff;--blue-border:#c4b5fd;--bg:#faf8ff;}
+/* ── Modo escuro ─────────────────────────────────────── */
+html.dark {
+  --bg:#0f0f14; --surface:#18181f; --surface2:#222230; --border:#2c2c3e;
+  --text:#e4e4f0; --muted:#9090b8; --accent:#4f8eff;
+  --green:#22c55e; --green-bg:#0b2218; --green-border:#1a4030;
+  --blue:#4f8eff;  --blue-bg:#0c1a30; --blue-border:#1a3060;
+  --red:#f87171;   --red-bg:#2a0c0c; --red-border:#501a1a;
+  --amber:#fbbf24; --amber-bg:#281800; --amber-border:#503000;
+  --teal:#2dd4bf;  --teal-bg:#0a2020; --teal-border:#1a3838;
+  --purple:#a78bfa;--purple-bg:#180c2e;--purple-border:#341858;
+}
+html.dark body { color-scheme: dark; }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;}
 
@@ -154,7 +166,7 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .modal-btn.secondary{background:var(--surface2);color:var(--text);}
 .modal-btn.secondary:hover{border-color:var(--accent);color:var(--accent);}
 
-.hdr-btn.clone:hover{color:#7c3aed;}
+.hdr-btn.clone:hover{color:var(--purple);}
 
 /* ══════════════════════════════════════════════════════
    CARDS
@@ -196,8 +208,8 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .emp-badge.ok  {background:var(--green-bg);color:var(--green);border-color:var(--green-border);}
 .emp-badge.pend{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);}
 
-.hdr-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 3px;color:rgba(0,0,0,.2);transition:color .1s;border-radius:4px;line-height:1;flex-shrink:0;}
-.hdr-btn:hover{color:rgba(0,0,0,.55);}
+.hdr-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 3px;color:rgba(255,255,255,.45);transition:color .1s;border-radius:4px;line-height:1;flex-shrink:0;}
+.hdr-btn:hover{color:rgba(255,255,255,.9);}
 .hdr-btn.del:hover{color:var(--red);}
 .chevron{font-size:10px;opacity:.45;transition:transform .2s;flex-shrink:0;line-height:1;}
 .chevron.fechado{transform:rotate(-90deg);}
@@ -217,7 +229,7 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
   flex:1;font-family:inherit;min-width:30px;
 }
 .secao-nome-input:focus{color:var(--text);}
-.secao-del{background:none;border:none;cursor:pointer;font-size:11px;color:#ddd;padding:0 2px;transition:color .1s;line-height:1;}
+.secao-del{background:none;border:none;cursor:pointer;font-size:11px;color:var(--border);padding:0 2px;transition:color .1s;line-height:1;}
 .secao-del:hover{color:var(--red);}
 
 /* Worker */
@@ -230,9 +242,9 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .worker-row:hover{background:var(--surface2);}
 .worker-row.sortable-ghost{opacity:.25;}
 
-.wdrag{font-size:11px;color:#ddd;cursor:grab;padding:0 2px;flex-shrink:0;line-height:1;}
+.wdrag{font-size:11px;color:var(--border);cursor:grab;padding:0 2px;flex-shrink:0;line-height:1;}
 .wdrag:active{cursor:grabbing;}
-.wdrag:hover{color:#aaa;}
+.wdrag:hover{color:var(--muted);}
 
 .worker-nome{
   font-size:11px;flex:1;min-width:0;
@@ -261,7 +273,7 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .ok-btn.pendente  {background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);}
 .ok-btn:hover{opacity:.7;}
 
-.wdel{background:none;border:none;cursor:pointer;font-size:11px;color:#e0e0e0;padding:0 2px;transition:color .1s;flex-shrink:0;line-height:1;}
+.wdel{background:none;border:none;cursor:pointer;font-size:11px;color:var(--border);padding:0 2px;transition:color .1s;flex-shrink:0;line-height:1;}
 .wdel:hover{color:var(--red);}
 
 .btn-add-worker{
