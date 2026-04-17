@@ -154,7 +154,7 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .modal-btn.secondary{background:var(--surface2);color:var(--text);}
 .modal-btn.secondary:hover{border-color:var(--accent);color:var(--accent);}
 
-.hdr-btn.clone:hover{color:#7c3aed;}
+.hdr-btn.clone:hover{color:var(--purple);}
 
 /* ══════════════════════════════════════════════════════
    CARDS
@@ -196,8 +196,8 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .emp-badge.ok  {background:var(--green-bg);color:var(--green);border-color:var(--green-border);}
 .emp-badge.pend{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);}
 
-.hdr-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 3px;color:rgba(0,0,0,.2);transition:color .1s;border-radius:4px;line-height:1;flex-shrink:0;}
-.hdr-btn:hover{color:rgba(0,0,0,.55);}
+.hdr-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 3px;color:rgba(255,255,255,.45);transition:color .1s;border-radius:4px;line-height:1;flex-shrink:0;}
+.hdr-btn:hover{color:rgba(255,255,255,.9);}
 .hdr-btn.del:hover{color:var(--red);}
 .chevron{font-size:10px;opacity:.45;transition:transform .2s;flex-shrink:0;line-height:1;}
 .chevron.fechado{transform:rotate(-90deg);}
@@ -217,7 +217,7 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
   flex:1;font-family:inherit;min-width:30px;
 }
 .secao-nome-input:focus{color:var(--text);}
-.secao-del{background:none;border:none;cursor:pointer;font-size:11px;color:#ddd;padding:0 2px;transition:color .1s;line-height:1;}
+.secao-del{background:none;border:none;cursor:pointer;font-size:11px;color:var(--border);padding:0 2px;transition:color .1s;line-height:1;}
 .secao-del:hover{color:var(--red);}
 
 /* Worker */
@@ -230,9 +230,9 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .worker-row:hover{background:var(--surface2);}
 .worker-row.sortable-ghost{opacity:.25;}
 
-.wdrag{font-size:11px;color:#ddd;cursor:grab;padding:0 2px;flex-shrink:0;line-height:1;}
+.wdrag{font-size:11px;color:var(--border);cursor:grab;padding:0 2px;flex-shrink:0;line-height:1;}
 .wdrag:active{cursor:grabbing;}
-.wdrag:hover{color:#aaa;}
+.wdrag:hover{color:var(--muted);}
 
 .worker-nome{
   font-size:11px;flex:1;min-width:0;
@@ -261,7 +261,7 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(18px,2vw,26p
 .ok-btn.pendente  {background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);}
 .ok-btn:hover{opacity:.7;}
 
-.wdel{background:none;border:none;cursor:pointer;font-size:11px;color:#e0e0e0;padding:0 2px;transition:color .1s;flex-shrink:0;line-height:1;}
+.wdel{background:none;border:none;cursor:pointer;font-size:11px;color:var(--border);padding:0 2px;transition:color .1s;flex-shrink:0;line-height:1;}
 .wdel:hover{color:var(--red);}
 
 .btn-add-worker{

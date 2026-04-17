@@ -1,9 +1,6 @@
 /* ── CSS específico de tarefas.html ── */
 .page{max-width:1320px;}
 
---gray-bg:#f4f4f6; --gray-border:#e2e2e8;
---urgent:#dc2626; --normal:#d97706; --baixa:#16a34a;
-
 /* Stats específicas */
 .stat-chip.s-progresso .stat-val{color:var(--blue);}
 .stat-chip.s-urgente .stat-val{color:var(--red);}
@@ -21,7 +18,7 @@
 .prio-pill[data-p="urgente"].sel{background:var(--red-bg);border-color:var(--red);color:var(--red);}
 .prio-pill[data-p="normal"].sel{background:var(--amber-bg);border-color:var(--amber);color:var(--amber);}
 .prio-pill[data-p="baixa"].sel{background:var(--green-bg);border-color:var(--green);color:var(--green);}
-.prio-pill:not(.sel):hover{border-color:#aaa;color:var(--text);}
+.prio-pill:not(.sel):hover{border-color:var(--muted);color:var(--text);}
 
 /* User info */
 .user-info-avatar{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:'Poppins',sans-serif;}
@@ -66,7 +63,7 @@
 .detail-item{display:flex;align-items:center;gap:4px;}
 .detail-item svg{width:11px;height:11px;opacity:.55;}
 .card-notas{margin-top:8px;font-size:10px;color:var(--muted);background:var(--surface2);border:1px dashed var(--border);border-radius:6px;padding:7px 10px;line-height:1.6;}
-.card-notas-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:3px;}
+.card-notas-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px;}
 .card-gestor{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
 .card-gestor.show{display:block;}
 .card-gestor-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;}
@@ -97,7 +94,7 @@
 .file-item-size{color:var(--muted);white-space:nowrap;font-size:9px;flex-shrink:0;}
 .file-item-dl{color:var(--accent);text-decoration:none;font-size:9px;white-space:nowrap;flex-shrink:0;padding:2px 6px;border-radius:4px;border:1px solid var(--blue-border);background:var(--blue-bg);}
 .file-item-dl:hover{opacity:.8;}
-.file-item-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:12px;padding:0 2px;flex-shrink:0;transition:color .1s;line-height:1;}
+.file-item-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:0 2px;flex-shrink:0;transition:color .1s;line-height:1;}
 .file-item-del:hover{color:var(--red);}
 .files-empty{font-size:10px;color:var(--muted);font-style:italic;padding:2px 0;}
 .upload-status{font-size:10px;color:var(--accent);font-style:italic;min-height:14px;}
