@@ -63,9 +63,11 @@
   function listenConversas(uid, cb) {
     return db.collection('conversas')
       .where('participantes', 'array-contains', uid)
-      .orderBy('ultimaMensagemTs', 'desc')
       .onSnapshot(snap => {
-        cb(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const docs = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.ultimaMensagemTs || 0) - (a.ultimaMensagemTs || 0));
+        cb(docs);
       }, err => console.warn('[chat] listenConversas error', err));
   }
 
