@@ -470,7 +470,6 @@
 
           <div class="clientes-detail-meta">
             ${c.numeroCliente ? `<span class="clientes-soft-badge">Nº ${window.escHtml(c.numeroCliente)}</span>` : ''}
-            ${c.grupo ? `<span class="clientes-soft-badge">${window.escHtml(c.grupo)}</span>` : ''}
             ${c.escritorioOrigem ? `<span class="clientes-soft-badge">${window.escHtml(c.escritorioOrigem)}</span>` : ''}
           </div>
 
