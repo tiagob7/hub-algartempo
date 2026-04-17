@@ -152,6 +152,9 @@
     if (profile.role === 'admin') return true;
     if (def.adminOnly) return false;
     if (!def.requiredPermissions.length) return true;
+    if (typeof window.temPermissaoNoPerfil === 'function') {
+      return def.requiredPermissions.some(perm => window.temPermissaoNoPerfil(profile, perm));
+    }
     if (typeof window.temPermissao !== 'function') return false;
     return def.requiredPermissions.some(perm => window.temPermissao(perm));
   }

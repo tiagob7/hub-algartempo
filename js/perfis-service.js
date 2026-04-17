@@ -233,10 +233,13 @@
 
     const permissoes = buildUserPermissions(perfil.permissoes);
 
-    await db().collection('utilizadores').doc(uid).update({
-      perfil: perfilId,
-      permissoes,
-    });
+    const ref = db().collection('utilizadores').doc(uid);
+    const snap = await ref.get();
+    if (snap.exists) {
+      await ref.update({ perfil: perfilId, permissoes });
+    } else {
+      await ref.set({ perfil: perfilId, permissoes }, { merge: true });
+    }
   }
 
   async function removePerfilFromUser(uid) {
@@ -246,10 +249,13 @@
       ? window.createDefaultPermissions()
       : { modules: {} };
 
-    await db().collection('utilizadores').doc(uid).update({
-      perfil: null,
-      permissoes,
-    });
+    const ref = db().collection('utilizadores').doc(uid);
+    const snap = await ref.get();
+    if (snap.exists) {
+      await ref.update({ perfil: null, permissoes });
+    } else {
+      await ref.set({ perfil: null, permissoes }, { merge: true });
+    }
   }
 
   // ── Propagação ────────────────────────────────────────────────────────────────

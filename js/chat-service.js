@@ -130,10 +130,8 @@
 
   /* ── Carregar utilizadores para o picker ── */
   async function loadUtilizadores() {
-    const snap = await db.collection('utilizadores').get();
-    return snap.docs
-      .map(d => ({ uid: d.id, ...d.data() }))
-      .filter(u => u.ativo !== false);
+    const snap = await db.collection('utilizadores').where('ativo', '==', true).get();
+    return snap.docs.map(d => ({ uid: d.id, ...d.data() }));
   }
 
   window.ChatService = {
