@@ -31,6 +31,11 @@
       { key: 'view',   label: 'Ver' },
       { key: 'manage', label: 'Gerir' },
     ]},
+    { id: 'clientes',     label: 'Clientes',      actions: [
+      { key: 'view',   label: 'Ver' },
+      { key: 'import', label: 'Importar' },
+      { key: 'edit',   label: 'Editar' },
+    ]},
   ];
 
   const DEFAULT_PROFILES = [
@@ -45,6 +50,7 @@
           admissoes:   { view: true,  create: true,  resolve: false },
           reclamacoes: { view: true,  manage: false },
           escalas:     { view: true,  manage: false },
+          clientes:    { view: false, import: false, edit: false },
         },
       },
     },
@@ -59,6 +65,7 @@
           admissoes:   { view: true,  create: true,  resolve: true  },
           reclamacoes: { view: true,  manage: true  },
           escalas:     { view: true,  manage: false },
+          clientes:    { view: true,  import: false, edit: false },
         },
       },
     },
@@ -73,6 +80,7 @@
           admissoes:   { view: true,  create: true,  resolve: true  },
           reclamacoes: { view: true,  manage: true  },
           escalas:     { view: true,  manage: true  },
+          clientes:    { view: true,  import: true,  edit: true  },
         },
       },
     },
@@ -87,6 +95,7 @@
           admissoes:   { view: false, create: false, resolve: false },
           reclamacoes: { view: true,  manage: true  },
           escalas:     { view: true,  manage: true  },
+          clientes:    { view: true,  import: true,  edit: false },
         },
       },
     },
@@ -224,10 +233,13 @@
 
     const permissoes = buildUserPermissions(perfil.permissoes);
 
-    await db().collection('utilizadores').doc(uid).update({
-      perfil: perfilId,
-      permissoes,
-    });
+    const ref = db().collection('utilizadores').doc(uid);
+    const snap = await ref.get();
+    if (snap.exists) {
+      await ref.update({ perfil: perfilId, permissoes });
+    } else {
+      await ref.set({ perfil: perfilId, permissoes }, { merge: true });
+    }
   }
 
   async function removePerfilFromUser(uid) {
@@ -237,10 +249,13 @@
       ? window.createDefaultPermissions()
       : { modules: {} };
 
-    await db().collection('utilizadores').doc(uid).update({
-      perfil: null,
-      permissoes,
-    });
+    const ref = db().collection('utilizadores').doc(uid);
+    const snap = await ref.get();
+    if (snap.exists) {
+      await ref.update({ perfil: null, permissoes });
+    } else {
+      await ref.set({ perfil: null, permissoes }, { merge: true });
+    }
   }
 
   // ── Propagação ────────────────────────────────────────────────────────────────

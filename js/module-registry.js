@@ -86,6 +86,15 @@
         icon: '<rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M5 8h6M5 5h6M5 11h4"/>',
       },
       {
+        id: 'clientes',
+        label: 'Clientes',
+        href: 'clientes.html',
+        order: 65,
+        requiredPermissions: ['modules.clientes.view'],
+        usesEscritorio: false,
+        icon: '<rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 1v4M11 1v4M2 7h12"/><path d="M5 10h6"/>',
+      },
+      {
         id: 'definicoes',
         label: 'Defini&ccedil;&otilde;es',
         href: 'definicoes.html',
@@ -143,6 +152,9 @@
     if (profile.role === 'admin') return true;
     if (def.adminOnly) return false;
     if (!def.requiredPermissions.length) return true;
+    if (typeof window.temPermissaoNoPerfil === 'function') {
+      return def.requiredPermissions.some(perm => window.temPermissaoNoPerfil(profile, perm));
+    }
     if (typeof window.temPermissao !== 'function') return false;
     return def.requiredPermissions.some(perm => window.temPermissao(perm));
   }

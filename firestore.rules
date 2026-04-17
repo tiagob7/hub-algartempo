@@ -69,8 +69,8 @@ service cloud.firestore {
 
     match /utilizadores/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || hasPerm('utilizadores', 'manage'));
-      allow list: if isActiveUser() && resource.data.ativo != false;
-      allow create: if signedIn() && request.auth.uid == uid;
+      allow list: if isAdmin() || (isActiveUser() && resource.data.ativo != false);
+      allow create: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow update: if signedIn() && (
         hasPerm('utilizadores', 'manage')
         || (request.auth.uid == uid
@@ -126,6 +126,13 @@ service cloud.firestore {
       allow write: if isActiveUser() && hasPerm('calendario', 'edit');
     }
 
+    match /clientes/{docId} {
+      allow read: if isActiveUser() && hasPerm('clientes', 'view');
+      allow create: if isActiveUser() && hasPerm('clientes', 'import');
+      allow update: if isActiveUser() && (hasPerm('clientes', 'import') || hasPerm('clientes', 'edit'));
+      allow delete: if false;
+    }
+
     // Escalas separadas por escritório: escalas/{escritorioId}/dias/{dateKey}
     match /escalas/{escritorioId}/dias/{dateKey} {
       allow read: if isActiveUser() && hasPerm('escalas', 'view') && officeMatches(escritorioId);
@@ -140,7 +147,7 @@ service cloud.firestore {
 
     match /conversas/{conversaId} {
       allow read: if isActiveUser()
-        && request.auth.uid in resource.data.participantes;
+        && (resource == null || request.auth.uid in resource.data.participantes);
 
       allow create: if isActiveUser()
         && request.auth.uid in request.resource.data.participantes
