@@ -332,6 +332,7 @@
 .clientes-detail-panel {
   min-width: 0;
   max-height: calc(100vh - 74px);
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -376,9 +377,10 @@
 }
 
 .clientes-detail-meta .clientes-soft-badge {
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .clientes-back-btn {
