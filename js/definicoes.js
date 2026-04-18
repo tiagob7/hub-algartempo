@@ -4,7 +4,14 @@ const CORES = [
   '#6366f1', '#059669', '#ea580c', '#9333ea',
 ];
 
-let paineis = { Utilizadores: false, Escritorios: false };
+let paineis = { Aparencia: false, Utilizadores: false, Escritorios: false };
+
+const THEME_PRESETS = [
+  { id: 'default', label: 'Azul clean',       accent: '#0284c7', bg: '#f1f5f9' },
+  { id: 'forest',  label: 'Verde atlântico',  accent: '#0f766e', bg: '#f0fffe' },
+  { id: 'sunset',  label: 'Terracota',        accent: '#c2410c', bg: '#fefaf5' },
+  { id: 'violet',  label: 'Violeta',          accent: '#7c3aed', bg: '#faf8ff' },
+];
 let escritoriosData = [];
 let utilizadoresAll = [];
 let escEditandoId = null;
@@ -60,9 +67,57 @@ function togglePainel(nome) {
     document.getElementById('panel' + nome).classList.add('open');
     document.getElementById('card' + nome).classList.add('active');
     setTimeout(() => document.getElementById('panel' + nome).scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    if (nome === 'Aparencia') carregarAparencia();
     if (nome === 'Utilizadores') carregarUtilizadores();
     if (nome === 'Escritorios') carregarEscritorios();
   }
+}
+
+function carregarAparencia() {
+  renderAparencia();
+}
+
+function renderAparencia() {
+  const body = document.getElementById('aparenciaBody');
+  const temaAtual = document.documentElement.getAttribute('data-theme') || 'default';
+  const dark = document.documentElement.classList.contains('dark');
+
+  body.innerHTML = `
+    <p class="field-label" style="margin-bottom:10px;">Tema de cor</p>
+    <div class="tema-grid">
+      ${THEME_PRESETS.map(t => `
+        <button class="tema-card ${t.id === temaAtual ? 'sel' : ''}" onclick="definirTema('${t.id}')">
+          <div class="tema-swatches">
+            <div class="tema-swatch" style="background:${t.accent};"></div>
+            <div class="tema-swatch" style="background:${t.bg};border:1px solid #d1d5db;"></div>
+          </div>
+          <div class="tema-label">${t.label}</div>
+          ${t.id === temaAtual ? '<div class="tema-check">✓</div>' : ''}
+        </button>`).join('')}
+    </div>
+    <p class="field-label" style="margin-top:20px;margin-bottom:10px;">Modo de visualização</p>
+    <div class="toggle-dark-row ${dark ? 'on' : ''}" onclick="toggleModoEscuro()">
+      <div class="toggle-dark-track"><div class="toggle-dark-thumb"></div></div>
+      <span class="toggle-dark-label">${dark ? 'Modo escuro ativo' : 'Modo claro ativo'}</span>
+      <span style="font-size:18px;line-height:1;">${dark ? '🌙' : '☀️'}</span>
+    </div>`;
+}
+
+async function definirTema(id) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  if (id === 'default') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', id);
+  try {
+    await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.themePreset': id });
+  } catch(e) { /* silently ignore */ }
+  renderAparencia();
+  toast('Tema aplicado');
+}
+
+function toggleModoEscuro() {
+  if (window.toggleDarkMode) window.toggleDarkMode();
+  renderAparencia();
 }
 
 async function carregarUtilizadores() {

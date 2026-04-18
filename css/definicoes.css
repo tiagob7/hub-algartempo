@@ -94,6 +94,27 @@ tr:last-child td{border-bottom:none;}
 .info-note{font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;line-height:1.7;margin-top:14px;display:flex;gap:8px;align-items:flex-start;}
 .info-note svg{width:13px;height:13px;flex-shrink:0;margin-top:1px;}
 
+/* APARÊNCIA */
+.tema-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:600px){.tema-grid{grid-template-columns:repeat(2,1fr);}}
+.tema-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 10px 8px;cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;position:relative;display:flex;flex-direction:column;gap:6px;}
+.tema-card:hover{border-color:var(--muted);}
+.tema-card.sel{border-color:var(--accent);background:var(--blue-bg);}
+.tema-swatches{display:flex;gap:4px;}
+.tema-swatch{width:22px;height:22px;border-radius:6px;flex-shrink:0;}
+.tema-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;line-height:1.3;}
+.tema-card.sel .tema-label{color:var(--accent);}
+.tema-check{position:absolute;top:7px;right:9px;font-size:11px;color:var(--accent);font-weight:700;}
+.toggle-dark-row{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;cursor:pointer;user-select:none;transition:border-color .15s;}
+.toggle-dark-row:hover{border-color:var(--muted);}
+.toggle-dark-row.on{border-color:var(--accent);}
+.toggle-dark-track{width:30px;height:17px;border-radius:9px;background:var(--border);position:relative;flex-shrink:0;transition:background .2s;}
+.toggle-dark-track::after{content:'';position:absolute;width:11px;height:11px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle-dark-row.on .toggle-dark-track{background:var(--accent);}
+.toggle-dark-row.on .toggle-dark-track::after{left:16px;}
+.toggle-dark-label{font-size:11px;flex:1;color:var(--muted);}
+.toggle-dark-row.on .toggle-dark-label{color:var(--accent);}
+
 /* MODAIS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:800;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
