@@ -1007,13 +1007,32 @@
     updateShellUser(profile);
 
     // Aplicar tema guardado nas preferências do utilizador
-    const theme = profile && profile.preferencias && profile.preferencias.dashboard
-      ? profile.preferencias.dashboard.themePreset
-      : null;
+    const prefs = profile && profile.preferencias && profile.preferencias.dashboard
+      ? profile.preferencias.dashboard
+      : {};
+    const theme = prefs.themePreset || null;
     if (theme && theme !== 'default') {
       document.documentElement.setAttribute('data-theme', theme);
     } else {
       document.documentElement.removeAttribute('data-theme');
+    }
+    // Aplicar cor de destaque personalizada
+    const customAccent = prefs.customAccent || null;
+    if (customAccent) {
+      document.documentElement.style.setProperty('--accent', customAccent);
+      document.documentElement.style.setProperty('--blue', customAccent);
+    } else {
+      document.documentElement.style.removeProperty('--accent');
+      document.documentElement.style.removeProperty('--blue');
+    }
+    // Aplicar fundo personalizado
+    const customBg = prefs.customBg || null;
+    if (customBg) {
+      document.documentElement.style.setProperty('--bg', customBg);
+      document.body.style.background = customBg;
+    } else {
+      document.documentElement.style.removeProperty('--bg');
+      document.body.style.removeProperty('background');
     }
   });
 })();
