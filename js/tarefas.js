@@ -126,11 +126,18 @@ window.bootProtectedPage({
 });
 
 
+let _submitTarefaLoading = false;
+
 async function submitTarefa() {
+  if (_submitTarefaLoading) return;
   const titulo    = document.getElementById('fTitulo').value.trim();
   const descricao = document.getElementById('fDescricao').value.trim();
   const destino   = document.getElementById('fEscritorio').value;
   if (!titulo) { toast('Introduz o título da tarefa!'); return; }
+
+  _submitTarefaLoading = true;
+  const btn = document.querySelector('#formTarefas .submit-btn, #formTarefas button[onclick*="submitTarefa"]');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
 
   const profile     = window.userProfile;
   const solicitante = profile ? (profile.nomeCompleto || profile.nome || profile.email) : '—';
@@ -176,11 +183,14 @@ async function submitTarefa() {
     document.getElementById('fTitulo').value    = '';
     document.getElementById('fDescricao').value = '';
     selPrio('normal');
-    // Fechar o painel após submeter com sucesso
     const fp = document.getElementById('formTarefas');
     if (fp) fp.classList.remove('open');
     toast('✓ Tarefa adicionada em ' + destino.charAt(0).toUpperCase() + destino.slice(1) + '!');
   } catch(e) { console.error(e); toast('Erro ao adicionar.'); }
+  finally {
+    _submitTarefaLoading = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+  }
 }
 
 async function updateEstado(id, val) {

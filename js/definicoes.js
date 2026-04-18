@@ -4,7 +4,44 @@ const CORES = [
   '#6366f1', '#059669', '#ea580c', '#9333ea',
 ];
 
-let paineis = { Utilizadores: false, Escritorios: false };
+const CORES_RAPIDAS = [
+  { hex: '#0284c7', label: 'Azul' },
+  { hex: '#0f766e', label: 'Verde' },
+  { hex: '#7c3aed', label: 'Violeta' },
+  { hex: '#c2410c', label: 'Terracota' },
+  { hex: '#db2777', label: 'Rosa' },
+  { hex: '#16a34a', label: 'Esmeralda' },
+  { hex: '#d97706', label: 'Âmbar' },
+  { hex: '#dc2626', label: 'Vermelho' },
+  { hex: '#0891b2', label: 'Ciano' },
+  { hex: '#4f46e5', label: 'Índigo' },
+  { hex: '#374151', label: 'Grafite' },
+  { hex: '#9333ea', label: 'Púrpura' },
+];
+
+const FUNDOS_RAPIDOS = [
+  { hex: '#f1f5f9', label: 'Slate (predefinição)' },
+  { hex: '#f8fafc', label: 'Branco frio' },
+  { hex: '#ffffff', label: 'Branco puro' },
+  { hex: '#f9f7f4', label: 'Branco quente' },
+  { hex: '#fefaf5', label: 'Bege suave' },
+  { hex: '#fffbeb', label: 'Âmbar suave' },
+  { hex: '#f0fdf4', label: 'Verde suave' },
+  { hex: '#f0fffe', label: 'Ciano suave' },
+  { hex: '#ecfeff', label: 'Azul claro' },
+  { hex: '#faf8ff', label: 'Lavanda' },
+  { hex: '#fff1f2', label: 'Rosa suave' },
+  { hex: '#f4f4f5', label: 'Cinza neutro' },
+];
+
+let paineis = { Aparencia: false, Utilizadores: false, Escritorios: false };
+
+const THEME_PRESETS = [
+  { id: 'default', label: 'Azul clean',       accent: '#0284c7', bg: '#f1f5f9' },
+  { id: 'forest',  label: 'Verde atlântico',  accent: '#0f766e', bg: '#f0fffe' },
+  { id: 'sunset',  label: 'Terracota',        accent: '#c2410c', bg: '#fefaf5' },
+  { id: 'violet',  label: 'Violeta',          accent: '#7c3aed', bg: '#faf8ff' },
+];
 let escritoriosData = [];
 let utilizadoresAll = [];
 let escEditandoId = null;
@@ -60,9 +97,229 @@ function togglePainel(nome) {
     document.getElementById('panel' + nome).classList.add('open');
     document.getElementById('card' + nome).classList.add('active');
     setTimeout(() => document.getElementById('panel' + nome).scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    if (nome === 'Aparencia') carregarAparencia();
     if (nome === 'Utilizadores') carregarUtilizadores();
     if (nome === 'Escritorios') carregarEscritorios();
   }
+}
+
+function carregarAparencia() {
+  renderAparencia();
+}
+
+function renderAparencia() {
+  const body = document.getElementById('aparenciaBody');
+  const temaAtual = document.documentElement.getAttribute('data-theme') || 'default';
+  const dark = document.documentElement.classList.contains('dark');
+  const corAtual = document.documentElement.style.getPropertyValue('--accent').trim() || '';
+  const bgAtual = document.documentElement.style.getPropertyValue('--bg').trim() || '';
+  const accentPadrao = THEME_PRESETS.find(t => t.id === temaAtual)?.accent || '#0284c7';
+  const bgPadrao = THEME_PRESETS.find(t => t.id === temaAtual)?.bg || '#f1f5f9';
+
+  body.innerHTML = `
+    <p class="field-label" style="margin-bottom:10px;">Tema de cor</p>
+    <div class="tema-grid">
+      ${THEME_PRESETS.map(t => `
+        <button class="tema-card ${t.id === temaAtual ? 'sel' : ''}" onclick="definirTema('${t.id}')">
+          <div class="tema-swatches">
+            <div class="tema-swatch" style="background:${t.accent};"></div>
+            <div class="tema-swatch" style="background:${t.bg};border:1px solid #d1d5db;"></div>
+          </div>
+          <div class="tema-label">${t.label}</div>
+          ${t.id === temaAtual ? '<div class="tema-check">✓</div>' : ''}
+        </button>`).join('')}
+    </div>
+
+    <div class="cor-custom-section">
+      <div class="cor-custom-header">
+        <p class="field-label" style="margin:0;">Cor de destaque</p>
+        ${corAtual ? `<button class="cor-reset-btn" onclick="resetCorPersonalizada()">Repor</button>` : ''}
+      </div>
+      <p class="cor-custom-desc">Botões, links e elementos ativos.</p>
+      <div class="cor-custom-row">
+        <label class="cor-picker-wrap" title="Escolher cor">
+          <input type="color" id="corPickerInput" value="${corAtual || accentPadrao}" oninput="previewCorPersonalizada(this.value)">
+          <div class="cor-picker-preview" style="background:${corAtual || accentPadrao};"></div>
+          <span class="cor-picker-label">${(corAtual || accentPadrao).toUpperCase()}</span>
+        </label>
+        <div class="cor-rapidas">
+          ${CORES_RAPIDAS.map(c => `
+            <button class="cor-rapida-btn ${c.hex === corAtual ? 'sel' : ''}" style="background:${c.hex};" title="${c.label}" onclick="aplicarCorPersonalizada('${c.hex}')"></button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="cor-preview-bar">
+        <span class="cor-preview-btn" id="corPreviewBtn" style="background:${corAtual || accentPadrao};">Botão</span>
+        <span class="cor-preview-link" id="corPreviewLink" style="color:${corAtual || accentPadrao};">Link de exemplo</span>
+        <span class="cor-preview-badge" id="corPreviewBadge" style="background:${corAtual || accentPadrao}1a;color:${corAtual || accentPadrao};border-color:${corAtual || accentPadrao}40;">Etiqueta</span>
+      </div>
+      <button class="btn btn-primary" style="margin-top:10px;background:${corAtual || accentPadrao};" onclick="aplicarCorPersonalizada(document.getElementById('corPickerInput').value)">Aplicar cor</button>
+    </div>
+
+    <div class="cor-custom-section" style="margin-top:10px;">
+      <div class="cor-custom-header">
+        <p class="field-label" style="margin:0;">Fundo da página</p>
+        ${bgAtual ? `<button class="cor-reset-btn" onclick="resetFundoPersonalizado()">Repor</button>` : ''}
+      </div>
+      <p class="cor-custom-desc">Cor de fundo geral da interface (não afeta o modo escuro).</p>
+      <div class="cor-custom-row">
+        <label class="cor-picker-wrap" title="Escolher cor de fundo">
+          <input type="color" id="bgPickerInput" value="${bgAtual || bgPadrao}" oninput="previewFundoPersonalizado(this.value)">
+          <div class="cor-picker-preview" style="background:${bgAtual || bgPadrao};border:1px solid #d1d5db;"></div>
+          <span class="cor-picker-label">${(bgAtual || bgPadrao).toUpperCase()}</span>
+        </label>
+        <div class="cor-rapidas">
+          ${FUNDOS_RAPIDOS.map(c => `
+            <button class="cor-rapida-btn fundo-btn ${c.hex === bgAtual ? 'sel' : ''}" style="background:${c.hex};border:1px solid #d1d5db;" title="${c.label}" onclick="aplicarFundoPersonalizado('${c.hex}')"></button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="fundo-preview-wrap" id="fundoPreviewWrap" style="background:${bgAtual || bgPadrao};">
+        <div class="fundo-preview-card">
+          <div class="fundo-preview-line" style="background:${corAtual || accentPadrao};width:40%;"></div>
+          <div class="fundo-preview-line" style="width:70%;"></div>
+          <div class="fundo-preview-line" style="width:55%;"></div>
+        </div>
+        <div class="fundo-preview-card">
+          <div class="fundo-preview-line" style="width:60%;"></div>
+          <div class="fundo-preview-line" style="width:80%;"></div>
+        </div>
+      </div>
+      <button class="btn btn-secondary" style="margin-top:10px;" onclick="aplicarFundoPersonalizado(document.getElementById('bgPickerInput').value)">Aplicar fundo</button>
+    </div>
+
+    <p class="field-label" style="margin-top:20px;margin-bottom:10px;">Modo de visualização</p>
+    <div class="toggle-dark-row ${dark ? 'on' : ''}" onclick="toggleModoEscuro()">
+      <div class="toggle-dark-track"><div class="toggle-dark-thumb"></div></div>
+      <span class="toggle-dark-label">${dark ? 'Modo escuro ativo' : 'Modo claro ativo'}</span>
+      <span style="font-size:18px;line-height:1;">${dark ? '🌙' : '☀️'}</span>
+    </div>`;
+}
+
+function previewCorPersonalizada(cor) {
+  const input = document.getElementById('corPickerInput');
+  if (input) {
+    const label = input.closest('.cor-picker-wrap')?.querySelector('.cor-picker-label');
+    const preview = input.closest('.cor-picker-wrap')?.querySelector('.cor-picker-preview');
+    if (label) label.textContent = cor.toUpperCase();
+    if (preview) preview.style.background = cor;
+  }
+  const btn = document.getElementById('corPreviewBtn');
+  const link = document.getElementById('corPreviewLink');
+  const badge = document.getElementById('corPreviewBadge');
+  if (btn) btn.style.background = cor;
+  if (link) link.style.color = cor;
+  if (badge) {
+    badge.style.background = cor + '1a';
+    badge.style.color = cor;
+    badge.style.borderColor = cor + '40';
+  }
+}
+
+function previewFundoPersonalizado(cor) {
+  const input = document.getElementById('bgPickerInput');
+  if (input) {
+    const label = input.closest('.cor-picker-wrap')?.querySelector('.cor-picker-label');
+    const preview = input.closest('.cor-picker-wrap')?.querySelector('.cor-picker-preview');
+    if (label) label.textContent = cor.toUpperCase();
+    if (preview) preview.style.background = cor;
+  }
+  const wrap = document.getElementById('fundoPreviewWrap');
+  if (wrap) wrap.style.background = cor;
+}
+
+async function aplicarFundoPersonalizado(cor) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  document.documentElement.style.setProperty('--bg', cor);
+  localStorage.setItem('customBg', cor);
+  try {
+    await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customBg': cor });
+  } catch(e) {
+    toast('Erro ao guardar fundo: ' + (e.code || e.message));
+    return;
+  }
+  renderAparencia();
+  toast('Fundo aplicado');
+}
+
+async function resetFundoPersonalizado() {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  document.documentElement.style.removeProperty('--bg');
+  localStorage.removeItem('customBg');
+  try {
+    await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customBg': firebase.firestore.FieldValue.delete() });
+  } catch(e) {
+    toast('Erro ao repor fundo: ' + (e.code || e.message));
+    return;
+  }
+  renderAparencia();
+  toast('Fundo reposto');
+}
+
+async function definirTema(id) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  if (id === 'default') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', id);
+  try {
+    await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.themePreset': id });
+  } catch(e) { /* silently ignore */ }
+  renderAparencia();
+  toast('Tema aplicado');
+}
+
+function aplicarVarsAccent(cor) {
+  const r = parseInt(cor.slice(1,3),16), g = parseInt(cor.slice(3,5),16), b = parseInt(cor.slice(5,7),16);
+  document.documentElement.style.setProperty('--accent', cor);
+  document.documentElement.style.setProperty('--blue', cor);
+  document.documentElement.style.setProperty('--blue-bg', `rgba(${r},${g},${b},.10)`);
+  document.documentElement.style.setProperty('--blue-border', `rgba(${r},${g},${b},.28)`);
+  document.documentElement.style.setProperty('--sidebar-active-color', cor);
+  document.documentElement.style.setProperty('--sidebar-active-bg', `rgba(${r},${g},${b},.18)`);
+  document.documentElement.style.setProperty('--sidebar-active-icon-bg', `rgba(${r},${g},${b},.22)`);
+}
+
+function limparVarsAccent() {
+  ['--accent','--blue','--blue-bg','--blue-border',
+   '--sidebar-active-color','--sidebar-active-bg','--sidebar-active-icon-bg']
+    .forEach(v => document.documentElement.style.removeProperty(v));
+}
+
+async function aplicarCorPersonalizada(cor) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  aplicarVarsAccent(cor);
+  localStorage.setItem('customAccent', cor);
+  try {
+    await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customAccent': cor });
+  } catch(e) {
+    toast('Erro ao guardar cor: ' + (e.code || e.message));
+    return;
+  }
+  renderAparencia();
+  toast('Cor aplicada');
+}
+
+async function resetCorPersonalizada() {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  limparVarsAccent();
+  localStorage.removeItem('customAccent');
+  try {
+    await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customAccent': firebase.firestore.FieldValue.delete() });
+  } catch(e) {
+    toast('Erro ao repor cor: ' + (e.code || e.message));
+    return;
+  }
+  renderAparencia();
+  toast('Cor reposta');
+}
+
+function toggleModoEscuro() {
+  if (window.toggleDarkMode) window.toggleDarkMode();
+  renderAparencia();
 }
 
 async function carregarUtilizadores() {

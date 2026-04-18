@@ -32,19 +32,39 @@ service firebase.storage {
         || (userData() != null && userData().escritorio == officeId);
     }
 
+    // Limite de 50 MB por ficheiro
+    function withinSizeLimit() {
+      return request.resource.size < 52428800;
+    }
+
+    // Whitelist de tipos permitidos: imagens, PDF, Office, texto plano/CSV
+    function isAllowedContentType() {
+      return request.resource.contentType.matches('image/.+')
+        || request.resource.contentType == 'application/pdf'
+        || request.resource.contentType == 'application/msword'
+        || request.resource.contentType.matches('application/vnd\\.openxmlformats-officedocument\\..+')
+        || request.resource.contentType.matches('application/vnd\\.ms-.+')
+        || request.resource.contentType == 'text/plain'
+        || request.resource.contentType == 'text/csv';
+    }
+
+    function isAllowedUpload() {
+      return isActiveUser() && withinSizeLimit() && isAllowedContentType();
+    }
+
     match /tarefas/{docId}/{fileName} {
       allow read: if isActiveUser();
-      allow write: if isActiveUser();
+      allow write: if isAllowedUpload();
     }
 
     match /admissoes/{docId}/{fileName} {
       allow read: if isActiveUser();
-      allow write: if isActiveUser();
+      allow write: if isAllowedUpload();
     }
 
     match /reclamacoes/{docId}/{fileName} {
       allow read: if isActiveUser();
-      allow write: if isActiveUser();
+      allow write: if isAllowedUpload();
     }
 
     match /{allPaths=**} {

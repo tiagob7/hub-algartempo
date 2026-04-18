@@ -34,7 +34,9 @@ service cloud.firestore {
         && userData().permissoes.modules.get(module, {}).get(action, false) == true;
     }
 
-    // Compatibilidade com permissões legacy (escritas em campos raiz)
+    // Compatibilidade com permissões legacy (escritas em campos raiz).
+    // ATENÇÃO: manter em sincronia com PERMISSION_DEFINITIONS em js/auth.js —
+    // se adicionares legacyKeys lá, adiciona o mapeamento equivalente aqui.
     function legacyPerm(module, action) {
       return userData() != null
         && userData().permissoes != null
@@ -69,17 +71,29 @@ service cloud.firestore {
 
     match /utilizadores/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || hasPerm('utilizadores', 'manage'));
-      allow list: if isAdmin() || (isActiveUser() && resource.data.ativo != false);
-      allow create: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // Colaboradores só listam utilizadores do seu próprio escritório
+      allow list: if isAdmin()
+        || (isActiveUser() && resource.data.ativo != false && officeMatches(resource.data.escritorio));
+      // Auto-criação ao primeiro login: role obrigatoriamente 'colaborador'
+      // Criação por admin: qualquer role
+      allow create: if signedIn() && (
+        isAdmin()
+        || (request.auth.uid == uid && request.resource.data.role == 'colaborador')
+      );
       allow update: if signedIn() && (
-        hasPerm('utilizadores', 'manage')
+        isAdmin()
+        // Gestor de utilizadores pode editar mas NÃO pode escalar role para 'admin'
+        || (hasPerm('utilizadores', 'manage')
+          && (!request.resource.data.diff(resource.data).changedKeys().hasAny(['role'])
+              || request.resource.data.role != 'admin'))
         || (request.auth.uid == uid
           && request.resource.data.diff(resource.data).changedKeys().hasOnly([
             'ultimoAcesso',
             'nome',
             'apelido',
             'nomeCompleto',
-            'funcao'
+            'funcao',
+            'preferencias'
           ]))
       );
       allow delete: if hasPerm('utilizadores', 'manage');
@@ -141,7 +155,10 @@ service cloud.firestore {
 
     match /auditoria/{docId} {
       allow read: if isActiveUser() && hasPerm('auditoria', 'view');
-      allow create: if isActiveUser();
+      // Valida que o uid e email no log correspondem ao utilizador autenticado
+      allow create: if isActiveUser()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email;
       allow update, delete: if false;
     }
 

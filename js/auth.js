@@ -3,10 +3,26 @@
 
 window.currentUser = null;
 window.userProfile = null;
+let _profileUnsub = null;
 
 (function() {
   if (localStorage.getItem('darkMode') === '1') {
     document.documentElement.classList.add('dark');
+  }
+  const _accent = localStorage.getItem('customAccent');
+  if (_accent && /^#[0-9a-fA-F]{6}$/.test(_accent)) {
+    const r = parseInt(_accent.slice(1,3),16), g = parseInt(_accent.slice(3,5),16), b = parseInt(_accent.slice(5,7),16);
+    document.documentElement.style.setProperty('--accent', _accent);
+    document.documentElement.style.setProperty('--blue', _accent);
+    document.documentElement.style.setProperty('--blue-bg', `rgba(${r},${g},${b},.10)`);
+    document.documentElement.style.setProperty('--blue-border', `rgba(${r},${g},${b},.28)`);
+    document.documentElement.style.setProperty('--sidebar-active-color', _accent);
+    document.documentElement.style.setProperty('--sidebar-active-bg', `rgba(${r},${g},${b},.18)`);
+    document.documentElement.style.setProperty('--sidebar-active-icon-bg', `rgba(${r},${g},${b},.22)`);
+  }
+  const _bg = localStorage.getItem('customBg');
+  if (_bg && /^#[0-9a-fA-F]{6}$/.test(_bg)) {
+    document.documentElement.style.setProperty('--bg', _bg);
   }
 })();
 
@@ -269,7 +285,8 @@ firebase.auth().onAuthStateChanged(async user => {
   }));
 
   let fsOffline = false;
-  firebase.firestore()
+  if (_profileUnsub) { _profileUnsub(); _profileUnsub = null; }
+  _profileUnsub = firebase.firestore()
     .collection('utilizadores').doc(user.uid)
     .onSnapshot({ includeMetadataChanges: true }, snapShot => {
       const fromCache = snapShot.metadata.fromCache;

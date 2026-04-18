@@ -17,17 +17,22 @@
     const onData = cfg.onData || function() {};
     const onError = cfg.onError || function() {};
 
-    const primary = collection().orderBy('ordemChegada', 'asc').limit(limit).onSnapshot(snap => {
+    let fallbackUnsub = null;
+
+    const primaryUnsub = collection().orderBy('ordemChegada', 'asc').limit(limit).onSnapshot(snap => {
       onData(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     }, err => {
       console.error('[TasksService] orderBy fallback:', err);
-      const fallback = collection().limit(limit).onSnapshot(snap => {
+      fallbackUnsub = collection().limit(limit).onSnapshot(snap => {
         onData(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       }, onError);
-      if (typeof cfg.onFallback === 'function') cfg.onFallback(fallback);
+      if (typeof cfg.onFallback === 'function') cfg.onFallback(fallbackUnsub);
     });
 
-    return primary;
+    return function unsubscribe() {
+      primaryUnsub();
+      if (fallbackUnsub) fallbackUnsub();
+    };
   }
 
   async function create(data) {
@@ -46,11 +51,35 @@
     return collection().doc(id).delete();
   }
 
+  const UPLOAD_MAX_BYTES = 50 * 1024 * 1024;
+  const UPLOAD_ALLOWED_TYPES = new Set([
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'text/csv',
+  ]);
+
+  function validateFile(file) {
+    if (file.size > UPLOAD_MAX_BYTES) {
+      throw new Error(`"${file.name}" excede o tamanho máximo de 50 MB.`);
+    }
+    if (!UPLOAD_ALLOWED_TYPES.has(file.type)) {
+      throw new Error(`Tipo de ficheiro não permitido: "${file.name}". São aceites imagens, PDF e documentos Office.`);
+    }
+  }
+
   async function uploadFiles(taskId, files) {
     const storage = getStorage();
     const uploaded = [];
 
     for (const file of files || []) {
+      validateFile(file);
       const path = `tarefas/${taskId}/${Date.now()}_${file.name}`;
       const ref = storage.ref(path);
       const snap = await ref.put(file);
