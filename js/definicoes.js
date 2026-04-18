@@ -232,10 +232,12 @@ async function aplicarFundoPersonalizado(cor) {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   document.documentElement.style.setProperty('--bg', cor);
-  document.body.style.background = cor;
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customBg': cor });
-  } catch(e) { /* silently ignore */ }
+  } catch(e) {
+    toast('Erro ao guardar fundo: ' + (e.code || e.message));
+    return;
+  }
   renderAparencia();
   toast('Fundo aplicado');
 }
@@ -244,10 +246,12 @@ async function resetFundoPersonalizado() {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   document.documentElement.style.removeProperty('--bg');
-  document.body.style.removeProperty('background');
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customBg': firebase.firestore.FieldValue.delete() });
-  } catch(e) { /* silently ignore */ }
+  } catch(e) {
+    toast('Erro ao repor fundo: ' + (e.code || e.message));
+    return;
+  }
   renderAparencia();
   toast('Fundo reposto');
 }
@@ -264,14 +268,33 @@ async function definirTema(id) {
   toast('Tema aplicado');
 }
 
+function aplicarVarsAccent(cor) {
+  const r = parseInt(cor.slice(1,3),16), g = parseInt(cor.slice(3,5),16), b = parseInt(cor.slice(5,7),16);
+  document.documentElement.style.setProperty('--accent', cor);
+  document.documentElement.style.setProperty('--blue', cor);
+  document.documentElement.style.setProperty('--blue-bg', `rgba(${r},${g},${b},.10)`);
+  document.documentElement.style.setProperty('--blue-border', `rgba(${r},${g},${b},.28)`);
+  document.documentElement.style.setProperty('--sidebar-active-color', cor);
+  document.documentElement.style.setProperty('--sidebar-active-bg', `rgba(${r},${g},${b},.18)`);
+  document.documentElement.style.setProperty('--sidebar-active-icon-bg', `rgba(${r},${g},${b},.22)`);
+}
+
+function limparVarsAccent() {
+  ['--accent','--blue','--blue-bg','--blue-border',
+   '--sidebar-active-color','--sidebar-active-bg','--sidebar-active-icon-bg']
+    .forEach(v => document.documentElement.style.removeProperty(v));
+}
+
 async function aplicarCorPersonalizada(cor) {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
-  document.documentElement.style.setProperty('--accent', cor);
-  document.documentElement.style.setProperty('--blue', cor);
+  aplicarVarsAccent(cor);
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customAccent': cor });
-  } catch(e) { /* silently ignore */ }
+  } catch(e) {
+    toast('Erro ao guardar cor: ' + (e.code || e.message));
+    return;
+  }
   renderAparencia();
   toast('Cor aplicada');
 }
@@ -279,11 +302,13 @@ async function aplicarCorPersonalizada(cor) {
 async function resetCorPersonalizada() {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
-  document.documentElement.style.removeProperty('--accent');
-  document.documentElement.style.removeProperty('--blue');
+  limparVarsAccent();
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customAccent': firebase.firestore.FieldValue.delete() });
-  } catch(e) { /* silently ignore */ }
+  } catch(e) {
+    toast('Erro ao repor cor: ' + (e.code || e.message));
+    return;
+  }
   renderAparencia();
   toast('Cor reposta');
 }

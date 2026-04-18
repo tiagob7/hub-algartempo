@@ -1018,21 +1018,28 @@
     }
     // Aplicar cor de destaque personalizada
     const customAccent = prefs.customAccent || null;
-    if (customAccent) {
+    const accentVars = ['--accent','--blue','--blue-bg','--blue-border',
+      '--sidebar-active-color','--sidebar-active-bg','--sidebar-active-icon-bg'];
+    if (customAccent && /^#[0-9a-fA-F]{6}$/.test(customAccent)) {
+      const r = parseInt(customAccent.slice(1,3),16);
+      const g = parseInt(customAccent.slice(3,5),16);
+      const b = parseInt(customAccent.slice(5,7),16);
       document.documentElement.style.setProperty('--accent', customAccent);
       document.documentElement.style.setProperty('--blue', customAccent);
+      document.documentElement.style.setProperty('--blue-bg', `rgba(${r},${g},${b},.10)`);
+      document.documentElement.style.setProperty('--blue-border', `rgba(${r},${g},${b},.28)`);
+      document.documentElement.style.setProperty('--sidebar-active-color', customAccent);
+      document.documentElement.style.setProperty('--sidebar-active-bg', `rgba(${r},${g},${b},.18)`);
+      document.documentElement.style.setProperty('--sidebar-active-icon-bg', `rgba(${r},${g},${b},.22)`);
     } else {
-      document.documentElement.style.removeProperty('--accent');
-      document.documentElement.style.removeProperty('--blue');
+      accentVars.forEach(v => document.documentElement.style.removeProperty(v));
     }
     // Aplicar fundo personalizado
     const customBg = prefs.customBg || null;
     if (customBg) {
       document.documentElement.style.setProperty('--bg', customBg);
-      document.body.style.background = customBg;
     } else {
       document.documentElement.style.removeProperty('--bg');
-      document.body.style.removeProperty('background');
     }
   });
 })();
