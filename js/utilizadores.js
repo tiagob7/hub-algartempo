@@ -42,12 +42,6 @@ function refreshUtilizadores() {
 
 const PERMS_DEF = (window.getPermissionDefinitions ? window.getPermissionDefinitions() : [])
   .filter(def => ![
-    'modules.tarefas.view',
-    'modules.comunicados.view',
-    'modules.calendario.view',
-    'modules.admissoes.view',
-    'modules.reclamacoes.view',
-    'modules.escalas.view',
     'modules.utilizadores.manage',
     'modules.definicoes.manage',
     'modules.gerir-calendarios.manage',

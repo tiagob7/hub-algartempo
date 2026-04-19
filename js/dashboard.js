@@ -163,15 +163,7 @@ function simplifyDashboardChrome() {
   }
 }
 
-// ── Dark mode ──
-function toggleDarkMode() {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('darkMode', isDark ? '1' : '0');
-  document.querySelectorAll('.dark-toggle-icon').forEach(el => {
-    el.textContent = isDark ? '☀️' : '🌙';
-  });
-}
-// Inicializar ícone do botão com base no estado actual
+// ── Dark mode — icon init (toggle via window.toggleDarkMode em auth.js) ──
 (function() {
   const isDark = document.documentElement.classList.contains('dark');
   document.querySelectorAll('.dark-toggle-icon').forEach(el => {

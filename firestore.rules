@@ -69,8 +69,8 @@ service cloud.firestore {
 
     match /utilizadores/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || hasPerm('utilizadores', 'manage'));
-      allow list: if isActiveUser() && resource.data.ativo != false;
-      allow create: if signedIn() && request.auth.uid == uid;
+      allow list: if isAdmin() || (isActiveUser() && resource.data.ativo != false);
+      allow create: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow update: if signedIn() && (
         hasPerm('utilizadores', 'manage')
         || (request.auth.uid == uid
@@ -79,7 +79,8 @@ service cloud.firestore {
             'nome',
             'apelido',
             'nomeCompleto',
-            'funcao'
+            'funcao',
+            'preferencias'
           ]))
       );
       allow delete: if hasPerm('utilizadores', 'manage');
@@ -147,7 +148,7 @@ service cloud.firestore {
 
     match /conversas/{conversaId} {
       allow read: if isActiveUser()
-        && request.auth.uid in resource.data.participantes;
+        && (resource == null || request.auth.uid in resource.data.participantes);
 
       allow create: if isActiveUser()
         && request.auth.uid in request.resource.data.participantes

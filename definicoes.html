@@ -110,6 +110,27 @@
       </span>
     </a>
 
+    <!-- Aparência -->
+    <div class="def-card" id="cardAparencia" onclick="togglePainel('Aparencia')">
+      <div class="def-card-icon purple">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="8" cy="8" r="5.5"/>
+          <circle cx="8" cy="4" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="11.5" cy="10" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="4.5" cy="10" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="8" cy="8" r="1.6"/>
+        </svg>
+      </div>
+      <div>
+        <div class="def-card-title">Aparência</div>
+        <div class="def-card-desc">Escolher o tema de cor e o modo escuro da interface.</div>
+      </div>
+      <span class="def-card-link">
+        Personalizar
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
+      </span>
+    </div>
+
     <!-- Seed de Dados -->
     <a class="def-card" href="seed.html">
       <div class="def-card-icon red">
@@ -129,6 +150,25 @@
       </span>
     </a>
 
+  </div>
+
+  <!-- PAINEL APARÊNCIA -->
+  <div class="panel" id="panelAparencia">
+    <div class="panel-header">
+      <div class="def-card-icon purple" style="width:30px;height:30px;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" style="width:15px;height:15px;">
+          <circle cx="8" cy="8" r="5.5"/>
+          <circle cx="8" cy="4" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="11.5" cy="10" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="4.5" cy="10" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="8" cy="8" r="1.6"/>
+        </svg>
+      </div>
+      <h2>Aparência</h2>
+    </div>
+    <div class="panel-body">
+      <div id="aparenciaBody"></div>
+    </div>
   </div>
 
   <!-- PAINEL UTILIZADORES -->

@@ -52,10 +52,6 @@
         transition: width .28s ease;
       }
 
-      html.dark .app-shell-sidebar {
-        background: #121f1c;
-      }
-
       .app-shell-sidebar.collapsed {
         width: 68px;
       }
@@ -1011,13 +1007,39 @@
     updateShellUser(profile);
 
     // Aplicar tema guardado nas preferências do utilizador
-    const theme = profile && profile.preferencias && profile.preferencias.dashboard
-      ? profile.preferencias.dashboard.themePreset
-      : null;
+    const prefs = profile && profile.preferencias && profile.preferencias.dashboard
+      ? profile.preferencias.dashboard
+      : {};
+    const theme = prefs.themePreset || null;
     if (theme && theme !== 'default') {
       document.documentElement.setAttribute('data-theme', theme);
     } else {
       document.documentElement.removeAttribute('data-theme');
+    }
+    // Aplicar cor de destaque personalizada
+    const customAccent = prefs.customAccent || null;
+    const accentVars = ['--accent','--blue','--blue-bg','--blue-border',
+      '--sidebar-active-color','--sidebar-active-bg','--sidebar-active-icon-bg'];
+    if (customAccent && /^#[0-9a-fA-F]{6}$/.test(customAccent)) {
+      const r = parseInt(customAccent.slice(1,3),16);
+      const g = parseInt(customAccent.slice(3,5),16);
+      const b = parseInt(customAccent.slice(5,7),16);
+      document.documentElement.style.setProperty('--accent', customAccent);
+      document.documentElement.style.setProperty('--blue', customAccent);
+      document.documentElement.style.setProperty('--blue-bg', `rgba(${r},${g},${b},.10)`);
+      document.documentElement.style.setProperty('--blue-border', `rgba(${r},${g},${b},.28)`);
+      document.documentElement.style.setProperty('--sidebar-active-color', customAccent);
+      document.documentElement.style.setProperty('--sidebar-active-bg', `rgba(${r},${g},${b},.18)`);
+      document.documentElement.style.setProperty('--sidebar-active-icon-bg', `rgba(${r},${g},${b},.22)`);
+    } else {
+      accentVars.forEach(v => document.documentElement.style.removeProperty(v));
+    }
+    // Aplicar fundo personalizado
+    const customBg = prefs.customBg || null;
+    if (customBg) {
+      document.documentElement.style.setProperty('--bg', customBg);
+    } else {
+      document.documentElement.style.removeProperty('--bg');
     }
   });
 })();

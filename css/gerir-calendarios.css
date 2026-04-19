@@ -5,9 +5,21 @@
   --text:#0f172a; --muted:#94a3b8; --accent:#0284c7;
   --green:#16a34a; --red:#dc2626; --amber:#d97706; --purple:#7c3aed;
 }
-html[data-theme="forest"]:not(.dark){--accent:#0f766e;}
-html[data-theme="sunset"]:not(.dark){--accent:#c2410c;}
-html[data-theme="violet"]:not(.dark){--accent:#7c3aed;}
+html[data-theme="forest"]:not(.dark){--accent:#0f766e;--blue:#0f766e;--blue-bg:#ecfeff;--blue-border:#99f6e4;--bg:#f0fffe;}
+html[data-theme="sunset"]:not(.dark){--accent:#c2410c;--blue:#c2410c;--blue-bg:#fff7ed;--blue-border:#fdba74;--bg:#fefaf5;}
+html[data-theme="violet"]:not(.dark){--accent:#7c3aed;--blue:#7c3aed;--blue-bg:#f5f3ff;--blue-border:#c4b5fd;--bg:#faf8ff;}
+/* ── Modo escuro ─────────────────────────────────────── */
+html.dark {
+  --bg:#0f0f14; --surface:#18181f; --surface2:#222230; --border:#2c2c3e;
+  --text:#e4e4f0; --muted:#9090b8; --accent:#4f8eff;
+  --green:#22c55e; --green-bg:#0b2218; --green-border:#1a4030;
+  --blue:#4f8eff;  --blue-bg:#0c1a30; --blue-border:#1a3060;
+  --red:#f87171;   --red-bg:#2a0c0c; --red-border:#501a1a;
+  --amber:#fbbf24; --amber-bg:#281800; --amber-border:#503000;
+  --teal:#2dd4bf;  --teal-bg:#0a2020; --teal-border:#1a3838;
+  --purple:#a78bfa;--purple-bg:#180c2e;--purple-border:#341858;
+}
+html.dark body { color-scheme: dark; }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;}
 .page{max-width:960px;margin:0 auto;padding:32px 20px 60px;}
@@ -40,8 +52,8 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(20px,2.5vw,2
 /* ── CHECKS ── */
 .check-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
 .ck{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:10px;background:var(--surface2);transition:all .15s;user-select:none;text-transform:uppercase;letter-spacing:.05em;}
-.ck:hover{border-color:#aaa;}
-.ck.on{border-color:var(--accent);background:#eff6ff;color:var(--accent);}
+.ck:hover{border-color:var(--muted);}
+.ck.on{border-color:var(--accent);background:var(--blue-bg);color:var(--accent);}
 .ck input{display:none;}
 .ck-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:4px;}
 .ck-grid .ck{border-radius:8px;flex-direction:column;padding:6px 4px;justify-content:center;font-size:9px;text-transform:none;letter-spacing:0;}
@@ -75,18 +87,18 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(20px,2.5vw,2
 .ev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .ev-label{flex:1;}
 .ev-range{color:var(--muted);white-space:nowrap;}
-.ev-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 3px;transition:color .1s;line-height:1;}
+.ev-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 3px;transition:color .1s;line-height:1;}
 .ev-del:hover{color:var(--red);}
-.empty-msg{font-size:11px;color:#bbb;text-align:center;padding:12px 0;}
+.empty-msg{font-size:11px;color:var(--muted);text-align:center;padding:12px 0;}
 
 /* ── FERIADOS LIST ── */
 .feriado-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer;user-select:none;transition:all .15s;}
-.feriado-item:hover{border-color:#aaa;}
-.feriado-item.on{border-color:var(--purple);background:#f5f3ff;}
+.feriado-item:hover{border-color:var(--muted);}
+.feriado-item.on{border-color:var(--purple);background:var(--purple-bg);}
 .feriado-item input[type=checkbox]{accent-color:var(--purple);width:13px;height:13px;flex-shrink:0;pointer-events:none;}
 .feriado-dia{font-weight:600;min-width:52px;color:var(--text);}
 .feriado-nome{flex:1;}
-.feriado-mes{font-size:9px;padding:2px 8px;border-radius:10px;background:#eff6ff;color:var(--accent);border:1px solid #bfdbfe;white-space:nowrap;}
+.feriado-mes{font-size:9px;padding:2px 8px;border-radius:10px;background:var(--blue-bg);color:var(--accent);border:1px solid var(--blue-border);white-space:nowrap;}
 
 /* ── PROGRESSO ── */
 .progress-wrap{margin-top:14px;}
@@ -102,7 +114,7 @@ h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(20px,2.5vw,2
 /* ── VER EVENTOS (pesquisa) ── */
 .doc-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
 .doc-item:hover{border-color:var(--accent);}
-.doc-item.open{border-color:var(--accent);background:#eff6ff;}
+.doc-item.open{border-color:var(--accent);background:var(--blue-bg);}
 .doc-name{font-size:11px;flex:1;}
 .doc-count{font-size:10px;color:var(--muted);}
 .doc-chevron{font-size:14px;color:var(--muted);transition:transform .2s;}

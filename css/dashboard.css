@@ -31,6 +31,7 @@
   --red:  #dc2626;  --red-bg:  #fef2f2; --red-border:  #fecaca;
   --amber:#d97706;  --amber-bg:#fffbeb; --amber-border:#fde68a;
   --purple:#7c3aed; --purple-bg:#f5f3ff;--purple-border:#ddd6fe;
+  --teal:#0d9488;   --teal-bg:#f0fdfa;  --teal-border:#99f6e4;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
@@ -52,22 +53,16 @@
 
 /* ── Dark Mode ────────────────────────────────────────────────── */
 html.dark {
-  --accent:        #4db8ad;
-  --accent-light:  #0f2e2b;
-  --accent-border: #1e4d48;
-  --accent-strong: #6dcec4;
-  --bg:      #131210;
-  --surface: #1c1b18;
-  --surface2:#242220;
-  --border:  #312f2c;
-  --text:    #e8e6e1;
-  --muted:   #5a5754;
-  --green:  #3bb870;  --green-bg:  #0c1f14;  --green-border:  #1a3d26;
-  --blue:   #4db8ad;  --blue-bg:   #0f2e2b;  --blue-border:   #1e4d48;
-  --red:    #e87060;  --red-bg:    #1f0d0a;  --red-border:    #3d1810;
-  --amber:  #d4900a;  --amber-bg:  #1a1200;  --amber-border:  #3d2c00;
-  --purple: #9b7fe0;  --purple-bg: #130e1f;  --purple-border: #2a1e50;
-  --sidebar-bg: #121f1c;
+  --bg:      #0f0f14; --surface: #18181f; --surface2:#222230; --border: #2c2c3e;
+  --text:    #e4e4f0; --muted:   #9090b8; --accent:  #4f8eff;
+  --accent-light:  #0c1a30; --accent-border: #1a3060; --accent-strong: #7ab8ff;
+  --green:  #22c55e; --green-bg:  #0b2218; --green-border:  #1a4030;
+  --blue:   #4f8eff; --blue-bg:   #0c1a30; --blue-border:   #1a3060;
+  --red:    #f87171; --red-bg:    #2a0c0c; --red-border:    #501a1a;
+  --amber:  #fbbf24; --amber-bg:  #281800; --amber-border:  #503000;
+  --teal:   #2dd4bf; --teal-bg:   #0a2020; --teal-border:   #1a3838;
+  --purple: #a78bfa; --purple-bg: #180c2e; --purple-border: #341858;
+  --sidebar-bg: #0f172a;
 }
 html.dark body { color-scheme: dark; }
 
@@ -80,6 +75,7 @@ html[data-theme="forest"]:not(.dark) {
   --blue-bg: #ecfeff;
   --blue-border: #99f6e4;
   --sidebar-bg: #12312b;
+  --bg: #f0fffe;
 }
 
 html[data-theme="sunset"]:not(.dark) {
@@ -91,6 +87,7 @@ html[data-theme="sunset"]:not(.dark) {
   --blue-bg: #fff7ed;
   --blue-border: #fdba74;
   --sidebar-bg: #3c1f12;
+  --bg: #fefaf5;
 }
 
 html[data-theme="violet"]:not(.dark) {
@@ -102,6 +99,7 @@ html[data-theme="violet"]:not(.dark) {
   --blue-bg: #f5f3ff;
   --blue-border: #c4b5fd;
   --sidebar-bg: #21163d;
+  --bg: #faf8ff;
 }
 
 /* ── Reset & Base ─────────────────────────────────────────────── */
@@ -233,8 +231,8 @@ a { text-decoration: none; color: inherit; }
 }
 
 .sidebar-link.active {
-  background: rgba(14,165,233,.18);
-  color: #38bdf8;
+  background: var(--sidebar-active-bg, rgba(14,165,233,.18));
+  color: var(--sidebar-active-color, #38bdf8);
 }
 
 .sidebar-link-icon {
@@ -245,7 +243,7 @@ a { text-decoration: none; color: inherit; }
   transition: var(--t);
 }
 
-.sidebar-link.active .sidebar-link-icon { background: rgba(14,165,233,.2); }
+.sidebar-link.active .sidebar-link-icon { background: var(--sidebar-active-icon-bg, rgba(14,165,233,.2)); }
 .sidebar-link-icon svg { width: 16px; height: 16px; stroke-width: 2; fill: none; stroke: currentColor; }
 
 .sidebar-link-label { flex: 1; transition: var(--t); }
@@ -1380,7 +1378,7 @@ h1 {
 .rec-dash-dot.verificacao  { background: var(--amber); }
 .rec-dash-dot.enviada      { background: var(--blue); }
 .rec-dash-dot.confirmada   { background: var(--purple); }
-.rec-dash-dot.aguarda-proc { background: #0d9488; }
+.rec-dash-dot.aguarda-proc { background: var(--teal); }
 
 .rec-dash-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .rec-dash-meta { font-size: 11px; color: var(--muted); white-space: nowrap; }
@@ -1396,7 +1394,7 @@ h1 {
 .rec-kpi-chip.verificacao  { background: var(--amber-bg); color: var(--amber);   border-color: var(--amber-border); }
 .rec-kpi-chip.enviada      { background: var(--blue-bg);  color: var(--blue);    border-color: var(--blue-border); }
 .rec-kpi-chip.confirmada   { background: var(--purple-bg);color: var(--purple);  border-color: var(--purple-border); }
-.rec-kpi-chip.aguarda-proc { background: #f0fdfa; color: #0d9488; border-color: #99f6e4; }
+.rec-kpi-chip.aguarda-proc { background: var(--teal-bg); color: var(--teal); border-color: var(--teal-border); }
 
 /* ════════════════════════════════════════════════════════════════
    CALENDÁRIO MINI

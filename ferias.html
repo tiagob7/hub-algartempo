@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Férias &amp; Ausências</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/ferias.css">
+<script>if(localStorage.getItem('darkMode')==='1')document.documentElement.classList.add('dark');</script>
+</head>
+<body>
+
+<div class="page">
+  <div class="header-top">
+    <h1>Férias &amp; Ausências</h1>
+    <span id="syncStatus"></span>
+  </div>
+  <p class="subtitle" id="pageSubtitle">A carregar…</p>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-chip"><span class="stat-label">Total</span><span class="stat-val" id="statTotal">—</span></div>
+    <div class="stat-chip s-pendente"><span class="stat-label">Pendentes</span><span class="stat-val" id="statPendente">—</span></div>
+    <div class="stat-chip s-aprovado"><span class="stat-label">Aprovados</span><span class="stat-val" id="statAprovado">—</span></div>
+    <div class="stat-chip s-dias"><span class="stat-label">Dias férias (ano)</span><span class="stat-val" id="statDias">—</span></div>
+  </div>
+
+  <!-- VIEW TOGGLE -->
+  <div class="view-toggle">
+    <button class="view-btn active" data-v="lista" onclick="setView('lista')">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12M2 8h12M2 12h8"/></svg>
+      Lista
+    </button>
+    <button class="view-btn" data-v="mensal" onclick="setView('mensal')">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>
+      Mensal
+    </button>
+    <button class="view-btn" data-v="anual" onclick="setView('anual')">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="6" height="5" rx="1"/><rect x="9" y="4" width="6" height="5" rx="1"/><rect x="1" y="11" width="6" height="2" rx="1"/><rect x="9" y="11" width="6" height="2" rx="1"/></svg>
+      Anual
+    </button>
+  </div>
+
+  <!-- FILTROS PARTILHADOS -->
+  <div class="filters-bar">
+    <div class="filters-row">
+      <span class="ctrl-label">Escritório:</span>
+      <select class="filter-select" id="filterEscritorio" onchange="setFiltroEscritorio(this.value)">
+        <option value="">Todos os escritórios</option>
+      </select>
+      <span id="calEstadoWrap" style="display:flex;align-items:center;gap:6px;margin-left:8px;">
+        <span class="ctrl-label">Mostrar:</span>
+        <button class="filter-btn active" onclick="toggleCalEstado('pendente',this)">Pendentes</button>
+        <button class="filter-btn active" onclick="toggleCalEstado('aprovado',this)">Aprovados</button>
+        <button class="filter-btn" onclick="toggleCalEstado('rejeitado',this)">Rejeitados</button>
+      </span>
+    </div>
+    <div class="chips-row" id="collabChips"></div>
+  </div>
+
+  <!-- FORM (acessível em todas as vistas) -->
+  <div class="form-panel" id="formPanel">
+    <div class="panel-title panel-toggle" onclick="toggleForm()">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>
+      Novo Pedido de Ausência
+      <span class="panel-toggle-chevron">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </span>
+    </div>
+    <div class="form-panel-body">
+      <div class="form-grid">
+        <div>
+          <label class="field-label">Tipo de ausência</label>
+          <select class="form-select" id="fTipo">
+            <option value="ferias">Férias</option>
+            <option value="folga">Folga</option>
+            <option value="licenca">Licença</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div id="fEscritorioWrap" style="display:none;">
+          <label class="field-label">Escritório</label>
+          <select class="form-select" id="fEscritorio"><option value="">A carregar…</option></select>
+        </div>
+        <div>
+          <label class="field-label">Data início *</label>
+          <input type="date" class="form-input" id="fInicio">
+        </div>
+        <div>
+          <label class="field-label">Data fim *</label>
+          <input type="date" class="form-input" id="fFim">
+        </div>
+        <div class="full">
+          <label class="field-label">Motivo / observações</label>
+          <textarea class="form-textarea" id="fMotivo" placeholder="Descreva brevemente o motivo (opcional)" maxlength="400"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+        <button class="btn btn-secondary btn-sm" onclick="toggleForm()" style="margin-right:8px;">Cancelar</button>
+        <button class="btn btn-primary" onclick="submitPedido()">Submeter pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LISTA VIEW ── -->
+  <div id="listaView">
+    <div class="controls-wrap">
+      <div class="controls-row">
+        <span class="ctrl-label">Estado:</span>
+        <button class="filter-btn active" data-f="todos"     onclick="setFiltro('todos')">Todos</button>
+        <button class="filter-btn"        data-f="pendente"  onclick="setFiltro('pendente')">Pendentes</button>
+        <button class="filter-btn"        data-f="aprovado"  onclick="setFiltro('aprovado')">Aprovados</button>
+        <button class="filter-btn"        data-f="rejeitado" onclick="setFiltro('rejeitado')">Rejeitados</button>
+        <span class="count-badge" id="countBadge"></span>
+      </div>
+    </div>
+    <div class="ferias-list" id="feriasList"></div>
+  </div>
+
+  <!-- ── MENSAL VIEW ── -->
+  <div id="mensalView" style="display:none">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="prevMonth()">‹</button>
+      <span class="cal-nav-label" id="calMonthLabel"></span>
+      <button class="cal-nav-btn" onclick="nextMonth()">›</button>
+      <button class="btn btn-secondary btn-sm" style="margin-left:auto;" onclick="abrirFormulario()">+ Novo pedido</button>
+    </div>
+    <div id="selHint" class="sel-hint"></div>
+    <div class="cal-mensal">
+      <div class="cal-weekdays">
+        <div class="cal-weekday">Seg</div><div class="cal-weekday">Ter</div>
+        <div class="cal-weekday">Qua</div><div class="cal-weekday">Qui</div>
+        <div class="cal-weekday">Sex</div><div class="cal-weekday">Sáb</div>
+        <div class="cal-weekday">Dom</div>
+      </div>
+      <div class="cal-days" id="calMensalGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── ANUAL VIEW ── -->
+  <div id="anualView" style="display:none">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="prevYear()">‹</button>
+      <span class="cal-nav-label" id="calYearLabel"></span>
+      <button class="cal-nav-btn" onclick="nextYear()">›</button>
+    </div>
+    <div class="cal-anual" id="calAnualGrid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/module-registry.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/offices-service.js"></script>
+<script src="js/config-escritorios.js"></script>
+<script src="js/app-platform.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/ferias-service.js"></script>
+<script src="js/ferias.js"></script>
+</body>
+</html>

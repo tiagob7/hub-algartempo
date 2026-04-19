@@ -232,6 +232,7 @@ async function aplicarFundoPersonalizado(cor) {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   document.documentElement.style.setProperty('--bg', cor);
+  localStorage.setItem('customBg', cor);
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customBg': cor });
   } catch(e) {
@@ -246,6 +247,7 @@ async function resetFundoPersonalizado() {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   document.documentElement.style.removeProperty('--bg');
+  localStorage.removeItem('customBg');
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customBg': firebase.firestore.FieldValue.delete() });
   } catch(e) {
@@ -289,6 +291,7 @@ async function aplicarCorPersonalizada(cor) {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   aplicarVarsAccent(cor);
+  localStorage.setItem('customAccent', cor);
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customAccent': cor });
   } catch(e) {
@@ -303,6 +306,7 @@ async function resetCorPersonalizada() {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   limparVarsAccent();
+  localStorage.removeItem('customAccent');
   try {
     await window.db.collection('utilizadores').doc(uid).update({ 'preferencias.dashboard.customAccent': firebase.firestore.FieldValue.delete() });
   } catch(e) {
